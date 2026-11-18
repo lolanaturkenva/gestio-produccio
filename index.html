@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Control de Producción</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--tx:#1b2026;--mu:#7d8790;--ln:#eceef1;--bg:#f4f5f7;--soft:#fafbfc;--red:#e04848;--redS:#fdecec;--grn:#1f9d55;--grnS:#e3f5ea;--or:#d9822b}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:15px}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit}
+.hidden{display:none!important}
+.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+/* cabecera */
+header{background:#fff;border-bottom:1px solid var(--ln);padding:.75rem 1.4rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:20}
+header h1{font-size:1.05rem;margin:0;flex:1;font-weight:700}
+header .wk{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;font-size:.85rem;padding:.3rem .7rem;border-radius:6px;background:var(--ln)}
+.lang{display:flex;border:1px solid var(--ln);border-radius:6px;overflow:hidden}
+.lang button{background:#fff;border:0;color:var(--mu);padding:.25rem .55rem;font-size:.78rem;font-weight:600}
+.lang button.on{background:var(--tx);color:#fff}
+.hbtn{background:#fff;border:1px solid var(--ln);color:var(--tx);border-radius:6px;padding:.28rem .7rem;font-size:.8rem}
+main{max-width:1150px;margin:0 auto;padding:1rem}
+.tabs{display:flex;gap:1.4rem;margin:0 0 1rem;border-bottom:1px solid var(--ln)}
+.tabs:empty{display:none}
+.tabs button{border:0;background:none;padding:.7rem 0;color:var(--mu);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--tx);border-bottom-color:var(--tx);font-weight:700}
+.panel{background:#fff;border:1px solid var(--ln);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.btn{background:var(--tx);color:#fff;border:1.5px solid var(--tx);border-radius:8px;padding:.6rem 1.1rem;font-weight:700}
+.btn.sec{background:#fff;color:var(--tx)}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn:disabled{opacity:.45;cursor:default}
+.muted{color:var(--mu);font-size:.85rem}
+/* login */
+.login{max-width:360px;margin:12vh auto;background:#fff;border-radius:14px;padding:2rem;border:1px solid var(--ln);text-align:center}
+.login h2{margin:.2rem 0 1.4rem;font-size:1.3rem}
+.login input{width:100%;padding:.75rem;border:1px solid #d6dae0;border-radius:8px;margin-bottom:1rem;text-align:center;font-size:1.05rem}
+.login .btn{width:100%;padding:.75rem}
+.login .lang{margin:0 auto 1rem;width:max-content}
+.err{color:var(--red);font-size:.9rem;min-height:1.2em;margin-top:.6rem}
+/* tarjeta de producción */
+.pcard{background:#fff;border:1px solid var(--ln);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.kp{padding:1.2rem 1.6rem;background:var(--soft);border-bottom:1px solid var(--ln);display:flex;gap:2rem;align-items:center;flex-wrap:wrap}
+.big{font-size:2.6rem;font-weight:800;letter-spacing:-.03em}
+.kp .ln{flex:1;min-width:220px}.kp p{margin:.45rem 0 0;font-size:.85rem;color:#5b6470}
+.bar{height:8px;background:var(--ln);border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;border-radius:5px}
+.kp .bar{height:10px}.kp .bar i{background:var(--tx)}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap}
+.chip{border-radius:10px;padding:.5rem .9rem;font-size:.8rem;font-weight:600;border:1.5px solid transparent;text-align:center;min-width:100px}
+.chip b{display:block;font-size:1.4rem;font-family:'JetBrains Mono',ui-monospace,monospace}
+.chip.c-p{background:var(--redS);color:var(--red)}
+.chip.c-c{background:linear-gradient(90deg,#fde9d6,#fdf5d2,#eaf5dc);color:#9a5a00}
+.chip.c-d{background:var(--grnS);color:var(--grn)}
+.chip.on{border-color:currentColor}
+.flt{display:flex;gap:1.4rem;padding:0 1.6rem;border-bottom:1px solid var(--ln);overflow:auto}
+.flt button{background:none;border:0;padding:.85rem 0;font-size:.9rem;color:var(--mu);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.flt button.on{color:var(--tx);border-bottom-color:var(--tx);font-weight:700}
+.gh{padding:.6rem 1.6rem;font-size:.7rem;font-weight:700;letter-spacing:.12em;color:var(--mu);background:var(--soft);border-bottom:1px solid var(--ln)}
+#prodGrid .gh{background:#505050;color:#fff;font-size:.8rem;letter-spacing:.14em;padding:.7rem 1.6rem;border-bottom:0}
+@media(max-width:700px){#prodGrid .gh{padding:.65rem 1rem}}
+.r{display:grid;grid-template-columns:minmax(0,3fr) 140px minmax(70px,1fr) 96px;align-items:center;gap:1rem;padding:.85rem 1.6rem;border-bottom:1px solid var(--ln)}
+.r>div:first-child{min-width:0}
+.r .n{font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:.5rem;white-space:nowrap}
+.r .n .nm{overflow:hidden;text-overflow:ellipsis}
+.r .mt{font-size:.75rem;color:var(--mu);margin-top:.15rem}
+.r .q{white-space:nowrap;text-align:right;font-weight:700;font-size:1.1rem}.r .q small{color:var(--mu);font-weight:500;font-size:.85rem}
+.r .q b{color:var(--c)}.r .bar i{background:var(--c)}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;padding:.18rem .55rem;border-radius:20px;color:var(--ct);background:var(--cs);margin-left:auto;white-space:nowrap}
+.r .btn{padding:.85rem 0}
+.r.done .btn{background:#fff;color:var(--tx)}
+.nores{padding:1.5rem 1.6rem;color:var(--mu)}
+.r2{display:grid;grid-template-columns:minmax(0,1fr) 120px;grid-template-areas:"i b" "s b" "p b";gap:.35rem 1.2rem;padding:.9rem 1.6rem;border-bottom:1px solid var(--ln);align-items:center}
+.r2 .info{grid-area:i;min-width:0;cursor:pointer}.r2 .stk{grid-area:s}.r2 .pr{grid-area:p;display:flex;align-items:center;gap:.8rem}.r2 .pr .bar{flex:1}.r2 .bar i{background:var(--c)}
+.r2 .btn{grid-area:b;padding:.95rem 0;font-size:1rem}.r2.done .btn{background:#fff;color:var(--tx)}
+.r2 .n{font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:.5rem;white-space:nowrap}
+.r2 .n .nm{overflow:hidden;text-overflow:ellipsis}.r2 .n .ic{flex:none;width:16px;height:16px;color:var(--mu)}
+.r2 .info:hover .nm{text-decoration:underline}
+.pcb{margin-left:auto;flex:none;font-size:.95rem;font-weight:600;color:var(--tx);background:var(--ln);border-radius:8px;padding:.2rem .6rem}
+.pcb b{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:1.05rem}
+.stk{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:.2rem .7rem}
+.sl{display:contents}
+.sl .lb{min-width:4.6em}
+.sl .lb{font-size:.95rem;color:#5b6470}.sl .v{font-size:.85rem;font-weight:500;color:var(--mu);text-align:right}
+.sl .cc{font-size:1.12rem;color:var(--tx);font-weight:700}.sl .cc.ok2{color:var(--grn)}.sl .cc.bad2{color:var(--red)}.sl .cc.zero2{color:var(--mu)}
+.r2 .pill{margin-left:0}
+@media(max-width:700px){
+  .r2{grid-template-columns:minmax(0,1fr) 92px;grid-template-areas:"i i" "s s" "p b";padding:.75rem 1rem;gap:.4rem .8rem}
+  .r2 .n{font-size:1rem}.pcb{font-size:.9rem}
+  .stk{gap:.15rem .5rem}.sl .lb{min-width:0}.sl .cc{font-size:1.05rem}.sl .v{font-size:.8rem}
+  .r2{padding:.75rem .85rem}.sl .lb{font-size:.88rem}.sl .v{font-size:.95rem}.sl .cc{font-size:.97rem;line-height:1.3}
+  .r2 .btn{padding:.75rem 0;font-size:.95rem}.r2 .pr{flex-direction:row}
+}@media(max-width:380px){.sl .cc{font-size:.98rem}.sl .lb{font-size:.82rem}.sl .v{font-size:.76rem}}
+
+.seg2{display:inline-flex;background:#e6e8ec;border-radius:10px;padding:3px;margin-bottom:.8rem}
+.seg2 button{border:0;background:none;padding:.5rem 1.3rem;border-radius:8px;font-weight:600;color:var(--mu)}
+.seg2 button.on{background:#fff;color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tw2{padding:.7rem 1.6rem;background:#fff8e6;border-bottom:1px solid var(--ln);color:#8a5a00;font-size:.85rem}
+.t{display:grid;grid-template-columns:minmax(0,3fr) 170px minmax(70px,1fr) 120px;align-items:center;gap:1rem;padding:.75rem 1.6rem;border-bottom:1px solid var(--ln);cursor:pointer}
+.t>div:first-child{min-width:0}
+.t .n{font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:.5rem;white-space:nowrap}
+.t .n .nm{overflow:hidden;text-overflow:ellipsis}
+.t .mt{font-size:.75rem;color:var(--mu);margin-top:.15rem;font-family:'JetBrains Mono',ui-monospace,monospace}
+.t .q{white-space:nowrap;text-align:right;font-weight:700;font-size:1.05rem}.t .q small{color:var(--mu);font-weight:500;font-size:.85rem}
+.t .q b{color:var(--c)}.t .bar i{background:var(--c)}
+.t .fl{text-align:right;font-size:.85rem;color:var(--mu);white-space:nowrap}.t .fl b{display:block;font-size:1.05rem;color:var(--tx);font-family:'JetBrains Mono',ui-monospace,monospace}
+.tdet{padding:.3rem 1.6rem 1rem;border-bottom:1px solid var(--ln);background:var(--soft)}
+.tdet table{font-size:.82rem}.tdet td:first-child{white-space:normal}
+@media(max-width:700px){
+  .t{grid-template-columns:auto 1fr 90px;grid-template-areas:"i i f" "q p p";gap:.35rem .7rem;padding:.6rem 1rem}
+  .t>div:first-child{grid-area:i}.t .q{grid-area:q;text-align:left;font-size:1rem}.t .pr{grid-area:p;align-self:center}.t .fl{grid-area:f}
+  .tdet{padding:.3rem .6rem .8rem}.tw2{padding:.6rem 1rem}
+}
+.r .info{cursor:pointer}
+.r .info .ic{flex:none;width:16px;height:16px;color:var(--mu)}
+.r .info:hover .nm{text-decoration:underline}
+.ctab th{white-space:normal;vertical-align:bottom;line-height:1.25}
+.ctab td:first-child{white-space:normal}.ctab .cn{font-weight:600}
+@media(min-width:701px){#tTable .cn{white-space:nowrap}}
+.ttab .c-tr{width:3.2em}.ttab th.tr{text-align:right}
+@media(max-width:700px){
+  .ttab{table-layout:fixed;width:100%;font-size:.76rem}
+  .ttab .c-tr{width:2.6em}.ttab .c-n{width:22%}
+  .ttab th,.ttab td{padding:.4rem .25rem}.ttab th{font-size:.62rem;letter-spacing:.03em}
+  .ttab td.num{font-size:.76rem}.ttab .cn{font-size:.78rem;word-break:normal;overflow-wrap:anywhere}
+  #mTall .modal{padding:1rem .8rem}
+}
+.ctab .code{color:var(--mu);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.75rem;margin-top:.1rem}
+@media(max-width:700px){.ctab{font-size:.82rem}.ctab th,.ctab td{padding:.45rem .4rem}}
+.ok{color:var(--grn);font-weight:600}
+/* vistas de archivo (formato app Ordenar producción) */
+.xl{border-collapse:collapse;width:auto;min-width:520px;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt}
+.xl th{background:#505050;color:#fff;font-weight:normal;font-size:11pt;letter-spacing:0;text-transform:none;padding:3px 10px;text-align:right;border:0;position:static}
+.xl td{padding:2px 10px;text-align:right;border:0;color:#000;font-family:Calibri,'Segoe UI',Arial,sans-serif}
+.xl th:nth-child(2),.xl td:nth-child(2){text-align:left}
+.xl tr.ev td{background:#fff}.xl tr.od td{background:#E2EFDA}.xl tr.sp td{height:14px}
+.esc2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;align-items:start}
+@media(max-width:800px){.esc2{grid-template-columns:1fr}}
+.esct{width:100%;border-collapse:collapse;table-layout:fixed;font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:10.5pt}
+.esct col.c1{width:70px}.esct col.c2{width:105px}.esct col.c4{width:12%}
+.esct th{background:#505050;color:#fff;font-weight:normal;font-size:9.5pt;letter-spacing:0;text-transform:none;padding:3px 5px;text-align:left;border:0;position:static}
+.esct td{padding:1px 5px;font-size:10pt;color:#000;border:0;font-family:Calibri,'Segoe UI',Arial,sans-serif;text-align:left}
+.esct tr.ah td{background:#D9E1F2;font-weight:bold;padding-top:4px;padding-bottom:2px;white-space:nowrap}
+.esct td.cc{color:#888;font-size:9pt;white-space:nowrap}.esct td.cu{text-align:right}
+.escx{margin-top:2.5rem;padding-top:1.5rem;border-top:2px dashed var(--ln)}.escx-t{max-width:52%}@media(max-width:800px){.escx-t{max-width:none}}
+.esct-title{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem}.warn{color:var(--or);font-weight:600}
+@media(max-width:700px){
+  header{padding:.6rem 1rem;gap:.5rem}header h1{font-size:.95rem}
+  main{padding:.6rem}
+  .kp{padding:1rem;gap:1rem}.big{font-size:2rem}.chips{width:100%}.chip{min-width:0;flex:1;padding:.4rem}
+  .flt{padding:0 1rem;gap:1rem}.gh{padding:.6rem 1rem}
+  .r{grid-template-columns:auto 1fr 78px;grid-template-areas:"i i i" "q p b";gap:.35rem .7rem;padding:.6rem 1rem}
+  .r>div:first-child{grid-area:i}.r .q{grid-area:q;text-align:left;font-size:1rem}.r .pr{grid-area:p;align-self:center}
+  .r .btn{grid-area:b;align-self:center;padding:.65rem 0;font-size:.85rem}
+  .r .n{font-size:.9rem;gap:.4rem}.pill{font-size:.68rem;padding:.12rem .45rem}.r .mt{font-size:.7rem}
+}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(20,24,28,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.modal{background:#fff;width:100%;max-width:480px;border-radius:16px 16px 0 0;padding:1.2rem 1.2rem calc(1.2rem + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+@media(min-width:600px){.ov{align-items:center}.modal{border-radius:16px}}
+.modal h3{margin:0 0 .3rem;font-size:1.15rem}
+.modal .now{font-size:.95rem;margin-bottom:1rem;color:#4a525b}
+.qbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.8rem}
+.qbtns button{padding:.8rem 0;border-radius:10px;border:1.5px solid var(--ln);background:#fff;font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',ui-monospace,monospace}
+.qbtns button.p{color:var(--grn);border-color:#bfe3cd;background:#f3fbf6}
+.qbtns button.m{color:var(--red);border-color:#f0c6c6;background:#fdf5f5}
+.addrow{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.addrow label{flex:1;font-weight:600}
+.addrow input{width:120px;padding:.6rem;font-size:1.3rem;text-align:center;border:2px solid var(--tx);border-radius:8px;font-family:'JetBrains Mono',ui-monospace,monospace}
+.stp{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.7rem}
+.stp label{font-weight:700;font-size:1.05rem}
+.stpc{display:flex;align-items:center;gap:.4rem}
+.stpc button{width:52px;height:52px;border-radius:10px;border:1.5px solid var(--tx);background:#fff;font-size:1.5rem;font-weight:700;line-height:1}
+.stpc input::-webkit-outer-spin-button,.stpc input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stpc input{-moz-appearance:textfield;width:90px;height:52px;text-align:center;font-size:1.5rem;border:2px solid var(--tx);border-radius:10px;font-family:'JetBrains Mono',ui-monospace,monospace}
+.calc{background:var(--soft);border:1px solid var(--ln);border-radius:10px;padding:.7rem .9rem;margin:.4rem 0 .6rem;font-size:.95rem;min-height:2.6em}
+.calc b{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:1.15rem}
+.r .done-cc{font-size:.75rem;color:var(--tx);margin-top:.1rem}
+.seg2.sr{display:flex;margin-bottom:.9rem}.seg2.sr button{flex:1;border:0;background:none;padding:.55rem;border-radius:8px;font-weight:700;color:var(--mu)}
+.seg2.sr button.on{background:#fff;color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg2.sr.neg button.on{color:var(--red)}
+.hist{margin-top:1.2rem;border-top:1px solid var(--ln);padding-top:.8rem}
+.histh{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem}
+#mHist{list-style:none;margin:0;padding:0;max-height:240px;overflow:auto;font-size:.88rem}
+#mHist li{display:flex;gap:.6rem;align-items:baseline;padding:.4rem 0;border-bottom:1px solid var(--ln)}
+#mHist li .d{color:var(--mu);font-size:.78rem;min-width:5.5em;font-family:'JetBrains Mono',ui-monospace,monospace}
+#mHist li .c{flex:1}
+#mHist li .q{font-weight:700;font-family:'JetBrains Mono',ui-monospace,monospace;white-space:nowrap}
+#mHist li.neg .q{color:var(--red)}
+#mHist li.x{opacity:.45;text-decoration:line-through}
+#mHist li.tot{font-weight:700;border-bottom:0;border-top:2px solid var(--tx)}
+.mx{position:absolute;top:.7rem;right:.7rem;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--ln);background:#fff;font-size:1.6rem;line-height:1;color:var(--tx);display:flex;align-items:center;justify-content:center;padding:0 0 3px}
+.mx:hover{border-color:var(--tx)}
+.preview{font-size:.9rem;color:#5b6470;margin-bottom:1rem;min-height:1.2em}
+.sep{border:0;border-top:1px dashed #d6dae0;margin:1rem 0}
+.mact{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem}
+/* tablas */
+.tw{overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th{background:var(--soft);color:var(--mu);font-weight:700;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:.6rem .7rem;text-align:right;white-space:nowrap;position:sticky;top:0;border-bottom:1px solid var(--ln)}
+td{padding:.5rem .7rem;text-align:right;border-bottom:1px solid var(--ln);white-space:nowrap}
+td.num{font-family:'JetBrains Mono',ui-monospace,monospace}
+th:first-child,td:first-child{text-align:left}
+tr.tot td{font-weight:800;border-top:2px solid var(--tx)}
+td.neg{color:var(--red)} td.pos{color:var(--or)}
+.log{list-style:none;padding:0;margin:0;font-size:.85rem}
+.log li{display:flex;gap:.6rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--ln)}
+.log li .q{font-weight:700;min-width:3.5em;text-align:right;font-family:'JetBrains Mono',ui-monospace,monospace}
+.log li .a{flex:1}
+.log li.x{opacity:.45;text-decoration:line-through}
+.lnk{background:none;border:0;color:var(--red);font-size:.8rem;text-decoration:underline;padding:0}
+details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
+.row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:.25rem}
+.fld label{font-size:.8rem;color:var(--mu)}
+.fld input,.fld select{padding:.5rem;border:1px solid #d6dae0;border-radius:7px;background:#fff}
+.summary{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem}
+.kpi{flex:1;min-width:130px;background:#fff;border:1px solid var(--ln);border-radius:12px;padding:.8rem 1rem}
+.kpi b{display:block;font-size:1.5rem;font-family:'JetBrains Mono',ui-monospace,monospace}
+.kpi span{font-size:.72rem;color:var(--mu);text-transform:uppercase;letter-spacing:.08em}
+.kpi .bar{margin-top:.4rem}.kpi .bar i{background:var(--tx)}
+.toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);background:var(--tx);color:#fff;padding:.6rem 1.1rem;border-radius:8px;z-index:90;font-size:.9rem}
+.toast.e{background:var(--red)}
+.load{position:fixed;top:0;left:0;height:3px;background:var(--grn);z-index:99;animation:ld 1.2s infinite}
+@keyframes ld{0%{width:0}100%{width:100%}}
+.offrow td{color:#999}
+.tag{font-size:.7rem;padding:.05rem .4rem;border-radius:4px;background:var(--ln);color:#555;margin-left:.3rem}
+</style>
+</head>
+<body>
+<div id="loader" class="load hidden"></div>
+
+<!-- LOGIN -->
+<div id="vLogin" class="login">
+  <div class="lang" id="langL"></div>
+  <h2 data-t="appTitle"></h2>
+  <div id="loginForm">
+    <input id="pwd" type="password" autocomplete="off">
+    <button class="btn" id="bLogin" data-t="enter"></button>
+    <div class="err" id="loginErr"></div>
+  </div>
+  <div id="loginWait" class="muted hidden" data-t="connecting"></div>
+</div>
+
+<!-- APP -->
+<div id="vApp" class="hidden">
+  <header>
+    <h1 data-t="appTitle"></h1>
+    <span class="wk" id="hWeek"></span>
+    <div class="lang" id="langH"></div>
+    <button class="hbtn" id="bOut" data-t="logout"></button>
+  </header>
+  <main>
+    <div class="tabs" id="tabs"></div>
+
+    <!-- PRODUCCIÓN -->
+    <section id="sProd" class="hidden">
+      <div id="prodEmpty" class="panel hidden" data-t="noActive"></div>
+      <div id="prodBody">
+        <div class="seg2" id="prodView">
+          <button data-v="ramos" class="on" data-t="vRamos"></button><button data-v="tallos" data-t="vTallos"></button>
+        </div>
+        <div class="pcard" id="ramosCard">
+          <div class="kp" id="prodSum"></div>
+          <div class="flt" id="prodFilters"></div>
+          <div id="prodGrid"></div>
+        </div>
+        <div class="pcard hidden" id="tallosCard">
+          <div class="kp" id="tallSum"></div>
+          <div id="tallWarn"></div>
+          <div id="tallGrid"></div>
+        </div>
+        <div class="panel">
+          <details id="logBox"><summary data-t="lastNotes"></summary><ul class="log" id="logList"></ul></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTADOS -->
+    <section id="sRes" class="hidden">
+      <div class="panel">
+        <div class="row">
+          <div class="fld"><label data-t="week"></label><select id="resWeek"></select></div>
+          <button class="btn sec" id="bResRefresh" data-t="refresh"></button>
+          <button class="btn" id="bExport" data-t="export"></button>
+        </div>
+      </div>
+      <div class="summary" id="resSum"></div>
+      <div class="panel tw" id="resTable"></div>
+    </section>
+
+    <!-- ARCHIVOS (admin y resultados) -->
+    <section id="sFiles" class="hidden">
+      <div class="panel">
+        <div class="row">
+          <div class="fld"><label data-t="week"></label><select id="fWeek"></select></div>
+          <button class="btn sec" id="bFRefresh" data-t="refresh"></button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0" data-t="fNecTitle"></h3>
+        <p class="muted" id="fNecInfo"></p>
+        <div class="tw" id="fNec"></div>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0" data-t="fEscTitle"></h3>
+        <p class="muted" id="fEscInfo"></p>
+        <div id="fEsc"></div>
+      </div>
+    </section>
+
+    <!-- SUBIR (admin) -->
+    <section id="sUp" class="hidden">
+      <div class="panel">
+        <h3 style="margin-top:0" data-t="upTitle"></h3>
+        <p class="muted" data-t="upHelp"></p>
+        <input type="file" id="file" accept=".xlsx,.xls">
+        <div id="upCfg" class="hidden" style="margin-top:1rem">
+          <div class="row" style="margin-bottom:1rem">
+            <div class="fld"><label data-t="year"></label><input id="upYear" type="number" style="width:90px"></div>
+            <div class="fld"><label data-t="weekNum"></label><input id="upWeek" type="number" min="1" max="53" style="width:80px"></div>
+            <span class="muted" id="upCount"></span>
+          </div>
+          <div id="upWarn" class="err"></div>
+          <div class="tw" id="upTable"></div>
+          <div class="mact"><button class="btn" id="bUpload" data-t="save"></button></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0" data-t="escTitle"></h3>
+        <p class="muted" data-t="escHelp"></p>
+        <input type="file" id="fileEsc" accept=".xlsx,.xls">
+        <div id="escCfg" class="hidden" style="margin-top:1rem">
+          <div class="row" style="margin-bottom:1rem">
+            <div class="fld"><label data-t="year"></label><input id="escYear" type="number" style="width:90px"></div>
+            <div class="fld"><label data-t="weekNum"></label><input id="escWeek" type="number" min="1" max="53" style="width:80px"></div>
+            <span class="muted" id="escCount"></span>
+          </div>
+          <div id="escWarn" class="err"></div>
+          <div class="tw" id="escTable"></div>
+          <div class="mact"><button class="btn" id="bUploadEsc" data-t="save"></button></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0" data-t="weeksTitle"></h3>
+        <div class="tw" id="weeksTable"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL ANOTAR -->
+<div id="mNote" class="ov hidden">
+  <div class="modal" style="position:relative">
+    <button class="mx" id="mClose" aria-label="Cerrar">&times;</button>
+    <h3 id="mName" style="padding-right:2.5rem"></h3>
+    <div class="now" id="mNow"></div>
+    <div class="seg2 sr" id="mSign"><button data-g="1" class="on" data-t="sumar"></button><button data-g="-1" data-t="restar"></button></div>
+    <div class="stp">
+      <label data-t="carros"></label>
+      <div class="stpc"><button data-s="ca" data-d="-1">−</button><input id="mCa" type="number" inputmode="numeric" min="0"><button data-s="ca" data-d="1">+</button></div>
+    </div>
+    <div class="stp">
+      <label data-t="cubos"></label>
+      <div class="stpc"><button data-s="cu" data-d="-1">−</button><input id="mCu" type="number" inputmode="numeric" min="0"><button data-s="cu" data-d="1">+</button></div>
+    </div>
+    <div class="calc" id="mCalc"></div>
+    <div class="preview" id="mPrev"></div>
+    <button class="btn" id="mSaveAdd" style="width:100%" data-t="saveAdd"></button>
+    <div class="hist"><div class="histh" data-t="history"></div><ul id="mHist"></ul></div>
+  </div>
+</div>
+
+<!-- MODAL COMPOSICIÓN -->
+<div id="mComp" class="ov hidden">
+  <div class="modal" style="max-width:640px">
+    <h3 id="cName"></h3>
+    <div class="now" id="cNow"></div>
+    <div class="tw" id="cTable"></div>
+    <div class="mact"><button class="btn sec" id="cClose" data-t="close"></button></div>
+  </div>
+</div>
+
+<!-- MODAL TALLO -->
+<div id="mTall" class="ov hidden">
+  <div class="modal" style="max-width:720px">
+    <h3 id="tName"></h3>
+    <div class="now" id="tNow"></div>
+    <div class="tw" id="tTable"></div>
+    <div class="mact"><button class="btn sec" id="tClose" data-t="close"></button></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR -->
+<div id="mConf" class="ov hidden">
+  <div class="modal" style="max-width:380px">
+    <p id="cMsg" style="font-size:1rem"></p>
+    <div class="mact"><button class="btn sec" id="cNo" data-t="no"></button><button class="btn red" id="cYes" data-t="yes"></button></div>
+  </div>
+</div>
+
+<script>
+/* ====== CONFIGURACIÓN ====== */
+const NEED_SRV = 5; // versión mínima de Code.gs que necesita esta app
+const API_URL = 'https://script.google.com/macros/s/AKfycbwhRSY2qFgrgKQxpo-Q5zPSGlHNCnWqG_RTtFF-_BpZv-_DajVzuDtVUD2yVDwlZBbiwA/exec';
+
+/* ====== TEXTOS ====== */
+const T = {
+ es:{appTitle:'Control de Producción',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
+  tProd:'Producción',tRes:'Resultados',tUp:'Necesidades',tFiles:'Archivos',refreshed:'Datos actualizados desde el Sheets',goUp:'Ir a Necesidades para subirlo',fNecTitle:'Necesidades de producción',fEscTitle:'Escandallo',fNoNec:'No hay necesidades cargadas para esta semana.',fNoEsc:'No hay escandallo cargado para esta semana.',fUploaded:'Subido el {d}',fNecCount:'{n} filas',fEscCount:'{n} artículos',fLeft:'Columna izquierda ({n} artículos)',fRight:'Columna derecha ({n} artículos)',fExcl:'Artículos no incluidos en el resultado ({n})',fOld:'Esta semana se subió antes de guardar todas las filas del Excel: solo se ven los ramos que se marcaron. Vuelve a subir el archivo para verlo completo.',week:'Semana',year:'Año',weekNum:'Nº semana',refresh:'Actualizar',export:'Exportar a Excel',
+  noActive:'Todavía no hay necesidades de producción cargadas.',planned:'Previsto',made:'Fabricado',pending:'Pendiente',progress:'Cumplimiento',
+  all:'Todos',onlyPending:'Pendientes',left:'Faltan',done:'Completado',over:'De más',stP:'Pendiente',stC:'En curso',chP:'pendiente',chC:'en curso',chD:'completados',annotate:'Anotar',madeOf:'fabricados de',plannedW:'previstos',leftW:'faltan',noItems:'No hay ramos con este filtro',lastNotes:'Últimas anotaciones',annul:'Anular',annulled:'anulado',
+  annulQ:'¿Anular esta anotación?',yes:'Sí',no:'No',toAdd:'Cantidad a sumar',saveAdd:'Guardar',setTotalLbl:'O escribe el total hecho',saveTotal:'Guardar total',close:'Cerrar',
+  nowMade:'Hecho: {a} de {b}',willBe:'Quedará en {a} de {b}',saved:'Guardado',negErr:'El total no puede quedar por debajo de 0',noLog:'Sin anotaciones todavía',
+  m_lote:'lote',m_botones:'botones',m_total:'total',m_anulacion:'anulación',
+  upTitle:'Subir necesidades de producción',upHelp:'Selecciona el Excel de la app «Ordenar producción». Revisa los artículos marcados (los verán los trabajadores) y la semana, y pulsa Guardar. Si la semana ya existe, se sustituyen las cantidades previstas y se mantiene lo fabricado.',
+  save:'Guardar',selCount:'{a} de {b} artículos seleccionados',weekExists:'La semana {w} ya existe: se sustituirán las cantidades previstas (lo fabricado se mantiene).',
+  badWeek:'Indica un año y un número de semana válidos.',noneSel:'No hay artículos seleccionados.',noHeader:'No encuentro la cabecera con «Nombre» y «Unidades» en el Excel.',
+  weeksTitle:'Semanas cargadas',escTitle:'Subir escandallo',escHelp:'Selecciona el Excel de escandallos de la semana. Al tocar un artículo en Producción se verá su composición. Si la semana ya tiene escandallo, se sustituye.',escNoHeader:'No encuentro las columnas «nombre», «componente», «nombre», «unidades» en el Excel.',escCount:'{a} artículos con composición',escExists:'La semana {w} ya tiene escandallo: se sustituirá.',escNoNeeds:'La semana {w} todavía no tiene necesidades cargadas.',escMissing:'Artículos de las necesidades sin escandallo:',comps:'Componentes',stemsBunch:'Tallos/ramo',inPlan:'En necesidades',notInWeek:'no está en la semana',confirmEsc:'¿Guardar el escandallo de la semana {w} con {n} artículos?',escCol:'Escandallo',noComp:'No hay escandallo cargado para este artículo en esta semana.',component:'Componente',stem:'Tallo',perBunch:'Ud./ramo',stemsPlanned:'Tallos previstos',stemsLeft:'Tallos que faltan',uploaded:'Subido',items:'Artículos',units:'Unidades',active:'Activa',setActive:'Activar',isActive:'activa',
+  article:'Artículo',group:'Grupo',diff:'Diferencia',total:'TOTAL',notInPlan:'fuera de previsión',sel:'Ver',noData:'Sin datos',
+  days:['dom','lun','mar','mié','jue','vie','sáb'],confirmUp:'¿Guardar la semana {w} con {n} artículos?'},
+ ca:{appTitle:'Control de Producció',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
+  tProd:'Producció',tRes:'Resultats',tUp:'Necessitats',tFiles:'Arxius',refreshed:'Dades actualitzades des del Sheets',goUp:'Anar a Necessitats per pujar-lo',fNecTitle:'Necessitats de producció',fEscTitle:'Escandall',fNoNec:'No hi ha necessitats carregades per a aquesta setmana.',fNoEsc:'No hi ha escandall carregat per a aquesta setmana.',fUploaded:'Pujat el {d}',fNecCount:'{n} files',fEscCount:'{n} articles',fLeft:'Columna esquerra ({n} articles)',fRight:'Columna dreta ({n} articles)',fExcl:'Articles no inclosos al resultat ({n})',fOld:'Aquesta setmana es va pujar abans de desar totes les files de l’Excel: només es veuen els rams que es van marcar. Torna a pujar l’arxiu per veure’l complet.',week:'Setmana',year:'Any',weekNum:'Núm. setmana',refresh:'Actualitzar',export:'Exportar a Excel',
+  noActive:'Encara no hi ha necessitats de producció carregades.',planned:'Previst',made:'Fabricat',pending:'Pendent',progress:'Compliment',
+  all:'Tots',onlyPending:'Pendents',left:'Falten',done:'Completat',over:'De més',stP:'Pendent',stC:'En curs',chP:'pendent',chC:'en curs',chD:'completats',annotate:'Anotar',madeOf:'fabricats de',plannedW:'previstos',leftW:'falten',noItems:'No hi ha rams amb aquest filtre',lastNotes:'Últimes anotacions',annul:'Anul·lar',annulled:'anul·lat',
+  annulQ:'Vols anul·lar aquesta anotació?',yes:'Sí',no:'No',toAdd:'Quantitat a sumar',saveAdd:'Desar',setTotalLbl:'O escriu el total fet',saveTotal:'Desar total',close:'Tancar',
+  nowMade:'Fet: {a} de {b}',willBe:'Quedarà en {a} de {b}',saved:'Desat',negErr:'El total no pot quedar per sota de 0',noLog:'Encara no hi ha anotacions',
+  m_lote:'lot',m_botones:'botons',m_total:'total',m_anulacion:'anul·lació',
+  upTitle:'Pujar necessitats de producció',upHelp:'Selecciona l’Excel de l’app «Ordenar producció». Revisa els articles marcats (els veuran els treballadors) i la setmana, i prem Desar. Si la setmana ja existeix, se substitueixen les quantitats previstes i es manté el que s’ha fabricat.',
+  save:'Desar',selCount:'{a} de {b} articles seleccionats',weekExists:'La setmana {w} ja existeix: se substituiran les quantitats previstes (el fabricat es manté).',
+  badWeek:'Indica un any i un número de setmana vàlids.',noneSel:'No hi ha articles seleccionats.',noHeader:'No trobo la capçalera amb «Nombre» i «Unidades» a l’Excel.',
+  weeksTitle:'Setmanes carregades',escTitle:'Pujar escandall',escHelp:'Selecciona l’Excel d’escandalls de la setmana. En tocar un article a Producció es veurà la seva composició. Si la setmana ja té escandall, se substitueix.',escNoHeader:'No trobo les columnes «nombre», «componente», «nombre», «unidades» a l’Excel.',escCount:'{a} articles amb composició',escExists:'La setmana {w} ja té escandall: se substituirà.',escNoNeeds:'La setmana {w} encara no té necessitats carregades.',escMissing:'Articles de les necessitats sense escandall:',comps:'Components',stemsBunch:'Tiges/ram',inPlan:'A necessitats',notInWeek:'no és a la setmana',confirmEsc:'Desar l’escandall de la setmana {w} amb {n} articles?',escCol:'Escandall',noComp:'No hi ha escandall carregat per a aquest article aquesta setmana.',component:'Component',stem:'Tija',perBunch:'Ut./ram',stemsPlanned:'Tiges previstes',stemsLeft:'Tiges que falten',uploaded:'Pujat',items:'Articles',units:'Unitats',active:'Activa',setActive:'Activar',isActive:'activa',
+  article:'Article',group:'Grup',diff:'Diferència',total:'TOTAL',notInPlan:'fora de previsió',sel:'Veure',noData:'Sense dades',
+  days:['dg','dl','dt','dc','dj','dv','ds'],confirmUp:'Desar la setmana {w} amb {n} articles?'}
+};
+
+/* ====== ESTADO ====== */
+const S = {
+  lang: lsGet('cp_lang') || 'es', pwd: lsGet('cp_pwd') || '', role: null, tab: null,
+  active: '', weeks: [], data: null, resData: null, filter: 'all', onlyPend: false, sem: null,
+  modal: null, upItems: null, poll: null
+};
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+const $ = id => document.getElementById(id);
+const t = (k, o) => { let s = (T[S.lang][k] ?? T.es[k] ?? k); if (o) for (const x in o) s = s.replace('{'+x+'}', o[x]); return s; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => { const v = Math.round(Number(n)||0); return (v<0?'-':'') + String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'.'); };
+const wkLabel = w => { const m = /^(\d{4})-W(\d{2})$/.exec(w||''); return m ? 'W'+Number(m[2])+' · '+m[1] : (w||''); };
+
+/* ====== API ====== */
+let busy = 0;
+function loading(on){ busy += on?1:-1; $('loader').classList.toggle('hidden', busy<=0); }
+async function api(action, data = {}, pwd){
+  loading(true);
+  try {
+    let lastErr;
+    for (let i = 0; i < 3; i++) {
+      try {
+        const r = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body: JSON.stringify(Object.assign({ action, pwd: pwd ?? S.pwd }, data)) });
+        const j = await r.json();
+        if (!j.ok) { const e = new Error(j.error||'Error'); e.server = true; throw e; }
+        return j;
+      } catch (e) { lastErr = e; if (e.server) throw e; await new Promise(r => setTimeout(r, 600*(i+1))); }
+    }
+    throw new Error(t('netErr'));
+  } finally { loading(false); }
+}
+function toast(msg, err){ const d=document.createElement('div'); d.className='toast'+(err?' e':''); d.textContent=msg; document.body.appendChild(d); setTimeout(()=>d.remove(), err?6000:1800); }
+function errMsg(e){ if(e.message==='NEG') return t('negErr'); if(e.message==='PWD') return t('badPwd'); return e.message; }
+function confirmBox(msg){ return new Promise(res => { $('cMsg').textContent = msg; $('mConf').classList.remove('hidden');
+  const done = v => { $('mConf').classList.add('hidden'); $('cYes').onclick=$('cNo').onclick=null; res(v); };
+  $('cYes').onclick = () => done(true); $('cNo').onclick = () => done(false); }); }
+
+/* ====== IDIOMA ====== */
+function renderLang(){
+  document.documentElement.lang = S.lang;
+  document.querySelectorAll('[data-t]').forEach(el => el.textContent = t(el.dataset.t));
+  $('pwd').placeholder = t('pwdPh');
+  ['langL','langH'].forEach(id => { $(id).innerHTML = ['es','ca'].map(l => `<button class="${S.lang===l?'on':''}" data-l="${l}">${l.toUpperCase()}</button>`).join(''); });
+  document.title = t('appTitle');
+  if (S.role) { renderTabs(); renderCurrent(); }
+}
+document.addEventListener('click', e => { const l = e.target.closest('[data-l]'); if (l) { S.lang = l.dataset.l; lsSet('cp_lang', S.lang); renderLang(); } });
+
+/* ====== LOGIN ====== */
+// La librería de Excel (900 KB) solo se descarga cuando hace falta (subir archivos o exportar)
+let _xlsxP = null;
+function needXLSX(){
+  if (window.XLSX) return Promise.resolve();
+  if (!_xlsxP) _xlsxP = new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    sc.onload = ok; sc.onerror = () => { _xlsxP = null; ko(new Error(t('netErr'))); }; document.head.appendChild(sc); });
+  return _xlsxP;
+}
+// Copia local de los últimos datos: la app se muestra al instante y se actualiza en segundo plano
+function saveCache(){ try { localStorage.setItem('cp_cache', JSON.stringify({ pwd:S.pwd, role:S.role, active:S.active, weeks:S.weeks, data:S.data, ts:Date.now() })); } catch(e){} }
+function readCache(pwd){ try { const c = JSON.parse(localStorage.getItem('cp_cache')||'null'); return c && c.pwd===pwd ? c : null; } catch(e){ return null; } }
+function enterApp(){
+  $('vLogin').classList.add('hidden'); $('vApp').classList.remove('hidden');
+  if (!S.tab || !tabsFor().includes(S.tab)) S.tab = S.role === 'resultados' ? 'res' : 'prod';
+}
+let loginSeq = 0;
+async function login(pwd, silent){
+  const my = ++loginSeq;
+  $('loginForm').classList.toggle('hidden', !!silent);
+  $('loginWait').classList.toggle('hidden', !silent);
+  // si hay datos guardados de la última vez, se enseñan ya mientras llegan los nuevos
+  const cache = silent ? readCache(pwd) : null;
+  if (cache) { S.pwd = pwd; S.role = cache.role; S.active = cache.active; S.weeks = cache.weeks||[]; S.data = cache.data; S.fresh = 0; enterApp(); renderTabs(); showTab(S.tab); }
+  try {
+    let r;
+    try { r = await api('init', {}, pwd); }
+    catch (e) { if (e.server && /desconocida/i.test(e.message)) { r = await api('login', {}, pwd); r.legacy = true; } else throw e; }
+    if (my !== loginSeq) return;   // se ha iniciado otro acceso: se ignora este
+    S.pwd = pwd; S.role = r.role; S.active = r.active; S.srvVersion = r.version || 0; lsSet('cp_pwd', pwd);
+    if (!r.legacy) { S.weeks = r.weeks || []; S.data = r.data || null; S.fresh = Date.now(); saveCache(); }
+    enterApp(); renderTabs(); await openTab(S.tab);
+    if (S.role === 'admin' && S.srvVersion < NEED_SRV) toast(t('oldSrv'), true);
+  } catch (e) {
+    if (my !== loginSeq) return;
+    if (cache && !e.server) { toast(t('offline'), true); return; }   // sin conexión: se queda con los datos guardados
+    lsSet('cp_pwd', null); S.pwd = ''; S.role = null;
+    if (cache) { $('vApp').classList.add('hidden'); $('vLogin').classList.remove('hidden'); }
+    if (!silent || cache) $('loginErr').textContent = errMsg(e);
+  } finally {
+    if (my === loginSeq) { $('loginForm').classList.remove('hidden'); $('loginWait').classList.add('hidden'); }
+  }
+}
+$('bLogin').onclick = () => { $('loginErr').textContent=''; login($('pwd').value.trim()); };
+$('pwd').addEventListener('keydown', e => { if (e.key==='Enter') $('bLogin').click(); });
+$('bOut').onclick = () => { lsSet('cp_pwd', null); try{localStorage.removeItem('cp_cache')}catch(e){} S.pwd=''; S.role=null; location.reload(); };
+
+/* ====== PESTAÑAS ====== */
+function tabsFor(){ return S.role==='admin' ? ['prod','res','up','files'] : S.role==='produccion' ? ['prod'] : ['res','files']; }
+function renderTabs(){
+  const tb = tabsFor();
+  $('tabs').innerHTML = tb.length>1 ? tb.map(k => `<button data-tab="${k}" class="${S.tab===k?'on':''}">${t({prod:'tProd',res:'tRes',up:'tUp',files:'tFiles'}[k])}</button>`).join('') : '';
+  $('hWeek').textContent = S.active ? wkLabel(S.active) : '';
+  $('hWeek').classList.toggle('hidden', !S.active);
+}
+$('tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) openTab(b.dataset.tab); };
+function showTab(k){   // muestra una pestaña con los datos que ya hay, sin pedir nada al servidor
+  if (!tabsFor().includes(k)) k = tabsFor()[0];
+  S.tab = k; renderTabs();
+  ['sProd','sRes','sUp','sFiles'].forEach(id => $(id).classList.add('hidden'));
+  $({prod:'sProd',res:'sRes',up:'sUp',files:'sFiles'}[k]).classList.remove('hidden');
+  if (k==='prod') renderProd();
+}
+async function openTab(k){
+  if (!tabsFor().includes(k)) k = tabsFor()[0];
+  S.tab = k; renderTabs();
+  ['sProd','sRes','sUp','sFiles'].forEach(id => $(id).classList.add('hidden'));
+  clearInterval(S.poll);
+  try {
+    if (k==='prod') { $('sProd').classList.remove('hidden'); await loadProd(); S.poll = setInterval(() => { if(!S.modal && !S.compOpen && !document.hidden) loadProd(true); }, 30000); }
+    if (k==='res')  { $('sRes').classList.remove('hidden'); await loadWeeks(); fillResWeek(); await loadRes(); }
+    if (k==='up')   { $('sUp').classList.remove('hidden'); await loadWeeks(); renderWeeks(); }
+    if (k==='files'){ $('sFiles').classList.remove('hidden'); await loadWeeks(); fillWeekSel($('fWeek')); await loadFiles(); }
+  } catch(e){ toast(errMsg(e), true); }
+}
+function renderCurrent(){ if(S.tab==='prod') renderProd(); if(S.tab==='res') { fillResWeek(); renderRes(); } if(S.tab==='up'){ renderWeeks(); renderUpTable(); } if(S.tab==='files'){ fillWeekSel($('fWeek')); renderFiles(); } }
+
+/* ====== PRODUCCIÓN ====== */
+async function loadProd(silent){
+  try {
+    if (S.fresh && Date.now() - S.fresh < 5000) { S.fresh = 0; renderProd(); return; }   // recién cargado con «init» (solo se aprovecha una vez)
+    if (!silent) { const w = await api('weeks'); S.weeks = w.weeks; S.active = w.active || (w.weeks[0]||{}).week || ''; renderTabs(); }
+    if (!S.active) { S.data = null; renderProd(); return; }
+    S.data = await api('getWeek', { week: S.active });
+    renderProd(); saveCache();
+  } catch(e){ if(!silent) toast(errMsg(e), true); }
+}
+function made(a){ return (S.data && S.data.totals[a]) || 0; }
+function estado(n){ const m = made(n.articulo); return m<=0 ? 'p' : m>=n.unidades ? 'd' : 'c'; }
+function hueFor(p){ return p<.5 ? 24+(48-24)*(p/.5) : 48+(110-48)*((p-.5)/.5); }
+function colores(n){
+  const e = estado(n);
+  if (e==='p') return { c:'#e04848', ct:'#e04848', cs:'#fdecec' };
+  if (e==='d') return { c:'#1f9d55', ct:'#167a41', cs:'#e3f5ea' };
+  const h = hueFor(made(n.articulo)/n.unidades), S2 = h<55?85:h<90?70:55, L = h<40?48:h<55?44:h<90?40:42;
+  return { c:`hsl(${h},${S2}%,${L}%)`, ct:`hsl(${h},${S2}%,${L-12}%)`, cs:`hsl(${h},75%,92%)` };
+}
+function etiqueta(n){
+  const e = estado(n), r = n.unidades - made(n.articulo);
+  if (e==='p') return t('stP');
+  if (e==='d') return '✓ '+t('done') + (r<0 ? ' +'+fmt(-r) : '');
+  return t('stC')+' · '+t('leftW')+' '+fmt(r);
+}
+function ccTxt(cubosTot){   // cubos totales -> «X carros · Y cubos»
+  const ca = Math.floor(cubosTot / CUBOS_CARRO), cu = cubosTot % CUBOS_CARRO;
+  return `${fmt(ca)}&nbsp;${t(ca===1?'carro1':'carrosL')} · ${fmt(cu)}&nbsp;${t(cu===1?'cubo1':'cubosL')}`;
+}
+function etiqueta2(n){   // estado sin la cantidad (la cantidad que falta va en «Faltan»)
+  const e = estado(n), r = n.unidades - made(n.articulo);
+  if (e==='p') return t('stP');
+  if (e==='d') return '✓ '+t('done') + (r<0 ? ' +'+fmt(-r) : '');
+  return t('stC');
+}
+function renderProd(){
+  const d = S.data;
+  $('prodEmpty').classList.toggle('hidden', !!(d && d.needs.length));
+  $('prodBody').classList.toggle('hidden', !(d && d.needs.length));
+  if (!d || !d.needs.length) return;
+  let P=0,F=0,T=0; const cnt={p:0,c:0,d:0};
+  d.needs.forEach(n => { const m=made(n.articulo); P+=n.unidades; F+=Math.min(m,n.unidades); T+=m; cnt[estado(n)]++; });
+  const pct = P? Math.round(F/P*100):0;
+  $('prodSum').innerHTML = `<div class="big mono">${pct}%</div>
+    <div class="ln"><div class="bar"><i style="width:${pct}%"></i></div><p><b>${fmt(T)}</b> ${t('madeOf')} <b>${fmt(P)}</b> ${t('plannedW')} · ${t('leftW')} <b>${fmt(Math.max(P-F,0))}</b></p></div>
+    <div class="chips">
+      <button class="chip c-p ${S.sem==='p'?'on':''}" data-sem="p"><b>${cnt.p}</b>${t('chP')}</button>
+      <button class="chip c-c ${S.sem==='c'?'on':''}" data-sem="c"><b>${cnt.c}</b>${t('chC')}</button>
+      <button class="chip c-d ${S.sem==='d'?'on':''}" data-sem="d"><b>${cnt.d}</b>${t('chD')}</button>
+    </div>`;
+  const groups = [...new Set(d.needs.map(n=>n.grupo))];
+  $('prodFilters').innerHTML = ['all',...groups].map(g => `<button class="${!S.onlyPend&&S.filter===g?'on':''}" data-f="${esc(g)}">${g==='all'?t('all'):esc(g.charAt(0)+g.slice(1).toLowerCase())}</button>`).join('')
+    + `<button class="${S.onlyPend?'on':''}" data-pend="1">${t('onlyPending')}</button>`;
+  const ok = n => (S.onlyPend || S.filter==='all' || n.grupo===S.filter) && (!S.onlyPend || estado(n)!=='d') && (!S.sem || estado(n)===S.sem);
+  let html = '';
+  groups.forEach(g => {
+    const rows = d.needs.filter(n => n.grupo===g && ok(n));
+    if (!rows.length) return;
+    html += `<div class="gh">${esc(g)}</div>` + rows.map(n => {
+      const m = made(n.articulo), k = colores(n), p = n.unidades ? Math.min(100, m/n.unidades*100) : 0;
+      // solo carros y cubos: el objetivo se redondea a cubos enteros (si hay paquetes sueltos, un cubo más)
+      const pc = n.pc > 0 ? n.pc : 0;
+      const cuObj = pc ? Math.ceil(n.unidades / pc) : 0, cuHecho = pc ? Math.floor(m / pc) : 0, cuFalta = Math.max(cuObj - cuHecho, 0);
+      return `<div class="r2 ${estado(n)==='d'?'done':''}" style="--c:${k.c};--ct:${k.ct};--cs:${k.cs}">
+        <div class="info" data-c="${esc(n.articulo)}"><div class="n"><span class="nm">${esc(n.articulo)}</span>${ICON}<span class="pcb">P/c <b>${fmt(n.pc)}</b></span></div></div>
+        <div class="stk">
+          <div class="sl"><span class="lb">${t('plannedS')}</span><span class="cc">${ccTxt(cuObj)}</span><span class="v mono">${fmt(n.unidades)}</span></div>
+          <div class="sl"><span class="lb">${t('madeL')}</span><span class="cc ok2">${ccTxt(cuHecho)}</span><span class="v mono">${fmt(m)}</span></div>
+          <div class="sl"><span class="lb">${t('left')}</span><span class="cc ${cuFalta?'bad2':'zero2'}">${ccTxt(cuFalta)}</span><span class="v mono">${fmt(Math.max(n.unidades - m, 0))}</span></div>
+        </div>
+        <div class="pr"><div class="bar"><i style="width:${p}%"></i></div><span class="pill">${etiqueta2(n)}</span></div>
+        <button class="btn" data-a="${esc(n.articulo)}">${t('annotate')}</button></div>`; }).join('');
+  });
+  $('prodGrid').innerHTML = html || `<div class="nores">${t('noItems')}</div>`;
+  renderLog();
+  renderTallos();
+  saveCache();
+}
+$('prodSum').onclick = e => { const b=e.target.closest('[data-sem]'); if(!b) return; S.sem = S.sem===b.dataset.sem ? null : b.dataset.sem; renderProd(); };
+$('prodFilters').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.pend){ S.onlyPend=true; } else { S.onlyPend=false; S.filter=b.dataset.f; } renderProd(); };
+$('prodGrid').onclick = e => { const c = e.target.closest('[data-a]'); if (c) { openNote(c.dataset.a); return; } const i = e.target.closest('[data-c]'); if (i) openComp(i.dataset.c); };
+const ICON = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>';
+const akey = s => String(s||'').toUpperCase().replace(/\s+/g,' ').trim();
+function compOf(d, art){ if (!d || !d.esc) return null; const k = akey(art); for (const a in d.esc) if (akey(a)===k) return d.esc[a]; return null; }
+function openComp(a){
+  const n = S.data.needs.find(x => x.articulo===a); if (!n) return;
+  const m = made(a), falta = Math.max(n.unidades - m, 0), comps = compOf(S.data, a);
+  $('cName').textContent = a;
+  $('cNow').textContent = `${t('planned')}: ${fmt(n.unidades)} · ${t('made')}: ${fmt(m)} · ${t('left')}: ${fmt(falta)}`;
+  if (!comps || !comps.length) { $('cTable').innerHTML = `<p class="muted">${t('noComp')}</p>`; }
+  else {
+    const tu = comps.reduce((s,c)=>s+c.unidades,0);
+    $('cTable').innerHTML = `<table class="ctab"><thead><tr><th>${t('stem')}</th><th>${t('perBunch')}</th><th>${t('stemsPlanned')}</th><th>${t('stemsLeft')}</th></tr></thead><tbody>
+      ${comps.map(c=>`<tr><td><div class="cn">${esc(c.componente)}</div><div class="code">${esc(c.codigo)}</div></td><td class="num"><b>${fmt(c.unidades)}</b></td><td class="num">${fmt(c.unidades*n.unidades)}</td><td class="num">${fmt(c.unidades*falta)}</td></tr>`).join('')}
+      <tr class="tot"><td>${t('total')}</td><td class="num">${fmt(tu)}</td><td class="num">${fmt(tu*n.unidades)}</td><td class="num">${fmt(tu*falta)}</td></tr></tbody></table>`;
+  }
+  S.compOpen = true; $('mComp').classList.remove('hidden');
+}
+function closeComp(){ $('mComp').classList.add('hidden'); S.compOpen = false; }
+$('cClose').onclick = closeComp;
+$('mComp').onclick = e => { if (e.target.id==='mComp') closeComp(); };
+
+function renderLog(){
+  const L = (S.data && S.data.log) || [];
+  $('logList').innerHTML = L.length ? L.map(x => {
+    const hh = (x.fechaHora||'').slice(5,16).replace(/^(\d\d)-(\d\d)/,'$2/$1');
+    const canAnnul = !x.anulado && !x.ref;
+    return `<li class="${x.anulado?'x':''}"><span class="muted">${esc(hh)}</span><span class="q">${x.cantidad>0?'+':''}${fmt(x.cantidad)}</span>
+      <span class="a">${esc(x.articulo)} ${(x.carros||x.cubos)?`<span class="muted">(${x.carros>0||x.cubos>0?'+':''}${fmt(x.carros)} ${t('carrosL')} · ${fmt(x.cubos)} ${t('cubosL')})</span> `:''}<span class="tag">${esc(t('m_'+x.modo))}</span>${x.anulado?` <span class="tag">${t('annulled')}</span>`:''}</span>
+      ${canAnnul?`<button class="lnk" data-id="${esc(x.id)}">${t('annul')}</button>`:''}</li>`; }).join('') : `<li class="muted">${t('noLog')}</li>`;
+}
+$('logList').onclick = async e => {
+  const b = e.target.closest('[data-id]'); if (!b) return;
+  if (!await confirmBox(t('annulQ'))) return;
+  try { S.data = await api('annul', { id: b.dataset.id }); renderProd(); toast(t('saved')); } catch(err){ toast(errMsg(err), true); }
+};
+
+/* ---- vista Tallos ---- */
+S.view = 'ramos'; S.tOpen = {};
+$('prodView').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; S.view = b.dataset.v;
+  $('prodView').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v===S.view));
+  $('ramosCard').classList.toggle('hidden', S.view!=='ramos'); $('tallosCard').classList.toggle('hidden', S.view!=='tallos'); };
+function colPct(m, u){
+  if (m<=0) return { c:'#e04848', ct:'#e04848', cs:'#fdecec' };
+  if (m>=u) return { c:'#1f9d55', ct:'#167a41', cs:'#e3f5ea' };
+  const h = hueFor(m/u), S2 = h<55?85:h<90?70:55, L = h<40?48:h<55?44:h<90?40:42;
+  return { c:`hsl(${h},${S2}%,${L}%)`, ct:`hsl(${h},${S2}%,${L-12}%)`, cs:`hsl(${h},75%,92%)` };
+}
+function tallosModel(d){
+  const map = {}, sinEsc = [];
+  d.needs.forEach(n => {
+    const comps = compOf(d, n.articulo);
+    if (!comps || !comps.length) { sinEsc.push(n.articulo); return; }
+    const hecho = made(n.articulo), falta = Math.max(n.unidades - hecho, 0);
+    comps.forEach(c => {
+      const k = c.codigo || c.componente;
+      const x = map[k] || (map[k] = { codigo:c.codigo, componente:c.componente, prev:0, usado:0, falta:0, arts:[] });
+      x.prev += c.unidades * n.unidades; x.usado += c.unidades * hecho; x.falta += c.unidades * falta;
+      x.arts.push({ a:n.articulo, ud:c.unidades, prev:c.unidades*n.unidades, usado:c.unidades*hecho, falta:c.unidades*falta });
+    });
+  });
+  const list = Object.values(map).sort((a,b) => b.prev - a.prev);
+  return { list, sinEsc };
+}
+function renderTallos(){
+  const d = S.data; if (!d || !d.needs.length) return;
+  const { list, sinEsc } = tallosModel(d);
+  const P = list.reduce((s,x)=>s+x.prev,0), U = list.reduce((s,x)=>s+x.usado,0), Fa = list.reduce((s,x)=>s+x.falta,0);
+  const pct = P ? Math.round(Math.min(U,P)/P*100) : 0;
+  $('tallSum').innerHTML = `<div class="big mono">${pct}%</div>
+    <div class="ln"><div class="bar"><i style="width:${pct}%"></i></div><p><b>${fmt(U)}</b> ${t('tUsedOf')} <b>${fmt(P)}</b> ${t('tPlannedW')} · ${t('tLeftW')} <b>${fmt(Fa)}</b></p></div>
+    <div class="chips"><div class="chip" style="background:var(--soft);color:var(--tx);border-color:var(--ln)"><b>${list.length}</b>${t('tTypes')}</div></div>`;
+  $('tallWarn').innerHTML = !d.esc || !Object.keys(d.esc).length ? `<div class="tw2">${esc(t('tNoEsc'))}</div>`
+    : sinEsc.length ? `<div class="tw2">${esc(t('tSinEsc'))} ${sinEsc.map(esc).join(', ')}</div>` : '';
+  $('tallGrid').innerHTML = list.length ? list.map((x,i) => {
+    const k = colPct(x.usado, x.prev), p = x.prev ? Math.min(100, x.usado/x.prev*100) : 0, key = x.codigo || x.componente;
+    const det = '';
+    return `<div class="t" data-tk="${esc(key)}" style="--c:${k.c};--ct:${k.ct};--cs:${k.cs}">
+      <div><div class="n"><span class="nm">${esc(x.componente)}</span></div><div class="mt">${esc(x.codigo)} · ${x.arts.length} ${t(x.arts.length===1?'tArt1':'tArts')}</div></div>
+      <div class="q mono"><b>${fmt(x.usado)}</b> <small>/ ${fmt(x.prev)}</small></div>
+      <div class="pr"><div class="bar"><i style="width:${p}%"></i></div></div>
+      <div class="fl">${t('tLeft')}<b>${fmt(x.falta)}</b></div></div>${det}`;
+  }).join('') : `<div class="nores">${t('tNone')}</div>`;
+}
+$('tallGrid').onclick = e => { const r = e.target.closest('.t'); if (r) openTall(r.dataset.tk); };
+function openTall(key){
+  const { list } = tallosModel(S.data); const x = list.find(y => (y.codigo || y.componente) === key); if (!x) return;
+  $('tName').textContent = x.componente;
+  $('tNow').innerHTML = `<span class="mono muted">${esc(x.codigo)}</span> · ${t('tPrev')}: <b>${fmt(x.prev)}</b> · ${t('tUsed')}: <b>${fmt(x.usado)}</b> · ${t('tLeft')}: <b>${fmt(x.falta)}</b>`;
+  const arts = x.arts.slice().sort((a,b) => b.prev - a.prev);
+  $('tTable').innerHTML = `<table class="ctab ttab"><colgroup><col><col class="c-tr"><col class="c-n"><col class="c-n"><col class="c-n"></colgroup><thead><tr><th>${t('article')}</th><th class="tr">${t('tPerBunch')}</th><th>${t('tPrev')}</th><th>${t('tUsed')}</th><th>${t('tLeft')}</th></tr></thead><tbody>
+    ${arts.map(a => { const n = S.data.needs.find(z => z.articulo===a.a), m = made(a.a), p = a.prev ? Math.round(Math.min(a.usado,a.prev)/a.prev*100) : 0, k = colPct(a.usado, a.prev);
+      return `<tr><td><div class="cn">${esc(a.a)}</div></td><td class="num"><b>${fmt(a.ud)}</b></td><td class="num">${fmt(a.prev)}</td><td class="num" style="color:${k.c};font-weight:700">${fmt(a.usado)}</td><td class="num">${fmt(a.falta)}</td></tr>`; }).join('')}
+    <tr class="tot"><td>${t('total')}</td><td></td><td class="num">${fmt(x.prev)}</td><td class="num">${fmt(x.usado)}</td><td class="num">${fmt(x.falta)}</td></tr></tbody></table>`;
+  S.compOpen = true; $('mTall').classList.remove('hidden');
+}
+function closeTall(){ $('mTall').classList.add('hidden'); S.compOpen = false; }
+$('tClose').onclick = closeTall;
+$('mTall').onclick = e => { if (e.target.id==='mTall') closeTall(); };
+
+/* ---- modal anotar ---- */
+const CUBOS_CARRO = 24;
+// ramos -> carros · cubos (+ ramos sueltos que no llegan a un cubo)
+function enCC(ramos, pc){
+  if (!(pc > 0)) return null;
+  const cubosT = Math.floor(ramos / pc), resto = ramos - cubosT * pc;
+  return { carros: Math.floor(cubosT / CUBOS_CARRO), cubos: cubosT % CUBOS_CARRO, resto };
+}
+function txtCC(o){
+  if (!o) return '';
+  let s = `${fmt(o.carros)}\u00a0${t(o.carros===1?'carro1':'carrosL')} · ${fmt(o.cubos)}\u00a0${t(o.cubos===1?'cubo1':'cubosL')}`;
+  if (o.resto) s += ` · ${fmt(o.resto)}\u00a0${t(o.resto===1?'ramo1':'ramosL')}`;
+  return s;
+}
+function setSign(g){ S.modal.sg = g; $('mSign').querySelectorAll('button').forEach(b => b.classList.toggle('on', Number(b.dataset.g)===g)); $('mSign').classList.toggle('neg', g<0); $('mSaveAdd').classList.toggle('red', g<0); }
+$('mSign').onclick = e => { const b = e.target.closest('[data-g]'); if (b && S.modal) { setSign(Number(b.dataset.g)); updNote(); } };
+function fechaHist(f){ // admin: día y hora; resto: solo día
+  const m = /^(\d{4})-(\d\d)-(\d\d)(?: (\d\d:\d\d))?/.exec(f||''); if (!m) return esc(f||'');
+  return `${m[3]}/${m[2]}` + (S.role==='admin' && m[4] ? ` ${m[4]}` : '');
+}
+function renderHist(){
+  const M = S.modal, H = ((S.data.hist||{})[M.a] || []).slice().reverse(), pc = M.n.pc;
+  if (!H.length) { $('mHist').innerHTML = `<li class="muted">${t('noLog')}</li>`; return; }
+  $('mHist').innerHTML = H.map(x => {
+    const cc = (x.ca||x.cu) ? `${x.ca>0||x.cu>0?'+':'−'}${fmt(Math.abs(x.ca))} ${t(Math.abs(x.ca)===1?'carro1':'carrosL')} · ${fmt(Math.abs(x.cu))} ${t(Math.abs(x.cu)===1?'cubo1':'cubosL')}` : '';
+    return `<li class="${x.q<0?'neg':''} ${x.an?'x':''}"><span class="d">${fechaHist(x.f)}</span><span class="c">${cc} <span class="tag">${esc(t('m_'+x.modo))}</span>${x.an?` <span class="tag">${t('annulled')}</span>`:''}</span><span class="q">${x.q>0?'+':''}${fmt(x.q)}</span></li>`;
+  }).join('') + `<li class="tot"><span class="d"></span><span class="c">${t('total')} · ${esc(txtCC(enCC(made(M.a), pc)))}</span><span class="q">${fmt(made(M.a))}</span></li>`;
+}
+function openNote(a){
+  const n = S.data.needs.find(x => x.articulo===a); if(!n) return;
+  S.modal = { a, n, sg: 1 }; setSign(1); renderHist();
+  $('mName').textContent = a; $('mCa').value = 0; $('mCu').value = 0;
+  updNote(); $('mNote').classList.remove('hidden');
+}
+function updNote(){
+  const M = S.modal, cur = made(M.a), pc = M.n.pc;
+  const ca = Math.max(0, Math.round(Number($('mCa').value)||0)), cu = Math.max(0, Math.round(Number($('mCu').value)||0));
+  M.ca = ca; M.cu = cu; M.add = M.sg * (ca*CUBOS_CARRO + cu) * pc;
+  $('mNow').innerHTML = `${t('nowMade', { a: fmt(cur), b: fmt(M.n.unidades) })}<br><span class="muted">${esc(txtCC(enCC(cur, pc)))} · P/c ${fmt(pc)}</span>`;
+  if (!(pc > 0)) { $('mCalc').textContent = t('noPc'); $('mPrev').textContent = ''; $('mSaveAdd').disabled = true; return; }
+  $('mCalc').innerHTML = `${M.sg<0?'−':''}(${fmt(ca)} × ${CUBOS_CARRO} + ${fmt(cu)}) × ${fmt(pc)} = <b style="${M.sg<0?'color:var(--red)':''}">${M.add>0?'+':''}${fmt(M.add)}</b> ${t('ramosL')}`;
+  $('mPrev').textContent = M.add ? (cur+M.add<0 ? t('negErr') : t('willBe', { a: fmt(cur+M.add), b: fmt(M.n.unidades) })) : '';
+  $('mPrev').style.color = cur+M.add<0 ? 'var(--red)' : '';
+  $('mSaveAdd').disabled = !M.add || cur+M.add<0;
+}
+document.querySelectorAll('.stpc button').forEach(b => b.onclick = () => { const i = $(b.dataset.s==='ca'?'mCa':'mCu'); i.value = Math.max(0, (Math.round(Number(i.value)||0)) + Number(b.dataset.d)); updNote(); });
+$('mCa').oninput = $('mCu').oninput = updNote;
+function closeNote(){ $('mNote').classList.add('hidden'); S.modal = null; }
+$('mClose').onclick = closeNote;
+$('mNote').onclick = e => { if (e.target.id==='mNote') closeNote(); };
+$('mSaveAdd').onclick = async () => {
+  const M = S.modal; if (!M || !M.add) return;
+  $('mSaveAdd').disabled = true;
+  try {
+    const before = made(M.a);
+    // se envía también la cantidad en ramos por compatibilidad con un Apps Script anterior
+    const r = await api('add', { week: S.active, articulo: M.a, carros: M.sg*M.ca, cubos: M.sg*M.cu, signo: M.sg, cantidad: M.add, modo: 'lote' });
+    if (r.nochange) throw new Error(t('notSaved'));
+    S.data = r; closeNote(); renderProd();
+    const okS = M.sg < 0 ? made(M.a) < before : made(M.a) > before;
+    toast(okS ? t('saved') : t('notSaved'), !okS);
+  }
+  catch(e){ toast(errMsg(e), true); updNote(); }
+};
+
+/* ====== RESULTADOS ====== */
+async function loadWeeks(){ const w = await api('weeks'); S.weeks = w.weeks; S.active = w.active || S.active; renderTabs(); }
+function fillResWeek(){
+  const sel = $('resWeek'), cur = sel.value || S.active || (S.weeks[0]||{}).week || '';
+  sel.innerHTML = S.weeks.map(w => `<option value="${esc(w.week)}">${esc(wkLabel(w.week))}${w.week===S.active?' ('+t('isActive')+')':''}</option>`).join('');
+  sel.value = cur;
+}
+async function loadRes(){ const w = $('resWeek').value; S.resData = w ? await api('getWeek', { week: w }) : null; renderRes(); }
+$('resWeek').onchange = () => loadRes().catch(e=>toast(errMsg(e),true));
+$('bResRefresh').onclick = () => loadRes().catch(e=>toast(errMsg(e),true));
+
+function resModel(d){
+  const days = [...new Set(Object.values(d.byDay).flatMap(o => Object.keys(o)))].sort();
+  const rows = d.needs.map(n => ({ a:n.articulo, g:n.grupo, p:n.unidades, f:d.totals[n.articulo]||0, by:d.byDay[n.articulo]||{} }));
+  // anotaciones de artículos que ya no están en la previsión (p. ej. tras resubir el archivo)
+  Object.keys(d.totals).forEach(a => { if (!d.needs.some(n=>n.articulo===a) && d.totals[a]) rows.push({ a, g:'', p:0, f:d.totals[a], by:d.byDay[a]||{}, off:true }); });
+  return { days, rows };
+}
+function dayLbl(s){ const [y,m,dd] = s.split('-').map(Number); const dt = new Date(y,m-1,dd); return t('days')[dt.getDay()]+' '+String(dd).padStart(2,'0')+'/'+String(m).padStart(2,'0'); }
+function pctOf(f,p){ return p ? Math.round(f/p*100) : 0; }
+function renderRes(){
+  const d = S.resData;
+  if (!d || !d.needs.length) { $('resSum').innerHTML=''; $('resTable').innerHTML = `<p class="muted">${t('noData')}</p>`; return; }
+  const { days, rows } = resModel(d);
+  const P = rows.reduce((s,r)=>s+r.p,0), F = rows.reduce((s,r)=>s+r.f,0);
+  $('resSum').innerHTML = `
+    <div class="kpi"><span>${t('planned')}</span><b>${fmt(P)}</b></div>
+    <div class="kpi"><span>${t('made')}</span><b>${fmt(F)}</b></div>
+    <div class="kpi"><span>${t('diff')}</span><b>${F-P>0?'+':''}${fmt(F-P)}</b></div>
+    <div class="kpi"><span>${t('progress')}</span><b>${pctOf(F,P)}%</b><div class="bar"><i style="width:${Math.min(100,pctOf(F,P))}%"></i></div></div>`;
+  const dayTot = days.map(x => rows.reduce((s,r)=>s+(r.by[x]||0),0));
+  $('resTable').innerHTML = `<table><thead><tr><th>${t('article')}</th>${days.map(x=>`<th>${dayLbl(x)}</th>`).join('')}<th>${t('made')}</th><th>${t('planned')}</th><th>${t('diff')}</th><th>%</th></tr></thead><tbody>
+    ${rows.map(r => { const df = r.f - r.p; return `<tr class="${r.off?'offrow':''}"><td>${esc(r.a)}${r.off?` <span class="tag">${t('notInPlan')}</span>`:''}</td>
+      ${days.map(x=>`<td>${r.by[x]?fmt(r.by[x]):''}</td>`).join('')}<td><b>${fmt(r.f)}</b></td><td>${fmt(r.p)}</td>
+      <td class="${df<0?'neg':df>0?'pos':''}">${df>0?'+':''}${fmt(df)}</td><td><span class="pct">${r.p?pctOf(r.f,r.p)+'%':''}</span></td></tr>`; }).join('')}
+    <tr class="tot"><td>${t('total')}</td>${dayTot.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${fmt(F)}</td><td>${fmt(P)}</td><td>${F-P>0?'+':''}${fmt(F-P)}</td><td>${pctOf(F,P)}%</td></tr>
+    </tbody></table>`;
+}
+$('bExport').onclick = async () => {
+  const d = S.resData; if (!d || !d.needs.length) return;
+  try { await needXLSX(); } catch(e) { toast(t('netErr'), true); return; }
+  const { days, rows } = resModel(d);
+  const head = [t('article'), t('group'), ...days.map(dayLbl), t('made'), t('planned'), t('diff'), '%'];
+  const aoa = [head, ...rows.map(r => [r.a, r.g, ...days.map(x => r.by[x]||0), r.f, r.p, r.f-r.p, r.p ? r.f/r.p : null])];
+  const P = rows.reduce((s,r)=>s+r.p,0), F = rows.reduce((s,r)=>s+r.f,0);
+  aoa.push([t('total'), '', ...days.map(x => rows.reduce((s,r)=>s+(r.by[x]||0),0)), F, P, F-P, P? F/P : null]);
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:34},{wch:8},...days.map(()=>({wch:10})),{wch:11},{wch:11},{wch:11},{wch:8}];
+  const pc = head.length-1; for (let r=1; r<aoa.length; r++){ const c = ws[XLSX.utils.encode_cell({r,c:pc})]; if(c) c.z='0%'; }
+  const wb = XLSX.utils.book_new();
+  const lbl = wkLabel(d.week).replace(' · ',' ');
+  XLSX.utils.book_append_sheet(wb, ws, (S.lang==='ca'?'Resultats ':'Resultados ')+lbl.split(' ')[0]);
+  XLSX.writeFile(wb, (S.lang==='ca'?'Resultats produccio ':'Resultados produccion ')+lbl+'.xlsx');
+};
+
+/* ====== SUBIR NECESIDADES ====== */
+const norm = s => String(s??'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'').trim();
+function cellStr(v){ if (v==null) return ''; if (typeof v==='object' && v.r) return v.r.map(x=>x.t).join(''); return String(v).trim(); }
+$('file').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  $('upWarn').textContent = '';
+  try {
+    await needXLSX();
+    const wb = XLSX.read(await f.arrayBuffer(), { type:'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:null, raw:true });
+    let hi = -1, col = {};
+    for (let i=0; i<rows.length && hi<0; i++){
+      const r = rows[i].map(norm);
+      if (r.includes('nombre') && r.includes('unidades')) { hi = i; r.forEach((h,j) => { if(h) col[h]=j; }); }
+    }
+    if (hi < 0) { $('upWarn').textContent = t('noHeader'); $('upCfg').classList.remove('hidden'); S.upItems=null; renderUpTable(); return; }
+    const g = (r,k) => col[k]!=null ? r[col[k]] : null;
+    const items = []; let bloque = 0, gap = false;
+    for (let i=hi+1; i<rows.length; i++){
+      const r = rows[i], nm = cellStr(g(r,'nombre'));
+      if (!nm) { if (items.length) gap = true; continue; }
+      if (gap) { bloque++; gap = false; }
+      const up = nm.toUpperCase();
+      const grupo = up.startsWith('RAMO') ? 'RAMO' : up.startsWith('PAPEL') ? 'PAPEL' : 'OTRO';
+      items.push({ articulo:nm, grupo, pc:Number(g(r,'p/c'))||0, unidades:Number(g(r,'unidades'))||0, carros:Number(g(r,'carros'))||0,
+        cubos:Number(g(r,'cubos'))||0, paquetes:Number(g(r,'paquetes'))||0, bloque, sel: grupo!=='OTRO' && !/NIDO/.test(up) });
+    }
+    S.upItems = items;
+    const m = /W\s*(\d{1,2})/i.exec(f.name);
+    $('upWeek').value = m ? Number(m[1]) : '';
+    $('upYear').value = new Date().getFullYear();
+    $('upCfg').classList.remove('hidden');
+    renderUpTable();
+  } catch(err){ toast(err.message, true); }
+};
+function upWeekKey(){ const y = Number($('upYear').value), w = Number($('upWeek').value); return (y>2000 && w>=1 && w<=53) ? `${y}-W${String(w).padStart(2,'0')}` : ''; }
+function renderUpTable(){
+  const it = S.upItems;
+  if (!it) { $('upTable').innerHTML=''; $('upCount').textContent=''; return; }
+  const n = it.filter(x=>x.sel).length;
+  $('upCount').textContent = t('selCount', { a:n, b:it.length });
+  const wk = upWeekKey();
+  $('upWarn').textContent = wk && S.weeks.some(w=>w.week===wk) ? t('weekExists', { w: wkLabel(wk) }) : '';
+  $('upTable').innerHTML = `<table><thead><tr><th style="text-align:center">${t('sel')}</th><th style="text-align:left">${t('article')}</th><th>P/c</th><th>${t('units')}</th><th>Carros</th><th>Cubos</th><th>Paquetes</th></tr></thead><tbody>
+   ${it.map((x,i)=>`<tr style="${x.sel?'':'opacity:.5'}"><td style="text-align:center"><input type="checkbox" data-i="${i}" ${x.sel?'checked':''}></td><td style="text-align:left">${esc(x.articulo)}</td>
+   <td>${fmt(x.pc)}</td><td>${fmt(x.unidades)}</td><td>${fmt(x.carros)}</td><td>${fmt(x.cubos)}</td><td>${fmt(x.paquetes)}</td></tr>`).join('')}</tbody></table>`;
+}
+$('upTable').onchange = e => { const c = e.target.closest('[data-i]'); if (c) { S.upItems[c.dataset.i].sel = c.checked; renderUpTable(); } };
+$('upWeek').oninput = $('upYear').oninput = renderUpTable;
+$('bUpload').onclick = async () => {
+  const wk = upWeekKey(); if (!wk) { toast(t('badWeek'), true); return; }
+  const items = (S.upItems||[]).filter(x=>x.sel); if (!items.length) { toast(t('noneSel'), true); return; }
+  if (!await confirmBox(t('confirmUp', { w: wkLabel(wk), n: items.length }))) return;
+  try {
+    const r = await api('upload', { week: wk, items: S.upItems.map(({sel,...x})=>Object.assign(x, { visible: !!sel })) });
+    S.weeks = r.weeks; S.active = r.active; renderTabs(); renderWeeks();
+    S.upItems = null; $('file').value=''; $('upCfg').classList.add('hidden');
+    toast(t('saved'));
+  } catch(e){ toast(errMsg(e), true); }
+};
+function renderWeeks(){
+  $('weeksTable').innerHTML = S.weeks.length ? `<table><thead><tr><th>${t('week')}</th><th>${t('items')}</th><th>${t('units')}</th><th>${t('uploaded')}</th><th>${t('escCol')}</th><th>${t('active')}</th></tr></thead><tbody>
+   ${S.weeks.map(w=>`<tr><td>${esc(wkLabel(w.week))}</td><td>${fmt(w.articulos)}</td><td>${fmt(w.unidades)}</td><td>${esc(w.subido)}</td><td>${w.escandallo?'✓ '+fmt(w.escandallo):'—'}</td>
+   <td>${w.week===S.active?'✓':`<button class="btn sec" style="padding:.2rem .6rem;font-size:.8rem" data-act="${esc(w.week)}">${t('setActive')}</button>`}</td></tr>`).join('')}</tbody></table>` : `<p class="muted">${t('noData')}</p>`;
+}
+$('weeksTable').onclick = async e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  try { const r = await api('setActive', { week: b.dataset.act }); S.active = r.active; renderTabs(); renderWeeks(); toast(t('saved')); } catch(err){ toast(errMsg(err), true); }
+};
+
+/* ====== SUBIR ESCANDALLO ====== */
+S.escItems = null; S.escNeeds = null;
+$('fileEsc').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  $('escWarn').textContent = '';
+  try {
+    await needXLSX();
+    const wb = XLSX.read(await f.arrayBuffer(), { type:'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:null, raw:false });
+    let hi = -1, groups = [];
+    for (let i=0; i<rows.length && hi<0; i++){
+      const r = rows[i].map(norm);
+      r.forEach((h,j) => { if (h==='componente' && norm(rows[i][j-1])==='nombre') groups.push(j); });
+      if (groups.length) hi = i;
+    }
+    if (hi < 0) { $('escWarn').textContent = t('escNoHeader'); S.escItems=null; $('escCfg').classList.remove('hidden'); renderEscTable(); return; }
+    const arts = [], idx = {};
+    groups.forEach((c, gi) => {
+      let cur = null, blanks = 0, inferior = false;
+      for (let i=hi+1; i<rows.length; i++){
+        const r = rows[i], nm = cellStr(r[c-1]), code = cellStr(r[c]), comp = cellStr(r[c+1]), u = r[c+2];
+        if (!nm && !code) { if (cur) blanks++; continue; }
+        if (blanks >= 2) inferior = true;   // bloque inferior (artículos no incluidos), separado por filas en blanco
+        blanks = 0;
+        if (nm && !code) { const k = akey(nm); cur = idx[k] || (idx[k] = { articulo:nm, lado: inferior ? 'X' : gi===0 ? 'I' : 'D', comps:[] }); if (!arts.includes(cur)) arts.push(cur); }
+        else if (code && cur) cur.comps.push({ codigo:code, componente:comp, unidades:Number(String(u??'').replace(',','.'))||0 });
+      }
+    });
+    S.escItems = arts.filter(a => a.comps.length);
+    const m = /W\s*(\d{1,2})/i.exec(f.name);
+    $('escWeek').value = m ? Number(m[1]) : '';
+    $('escYear').value = new Date().getFullYear();
+    $('escCfg').classList.remove('hidden');
+    await loadEscNeeds();
+  } catch(err){ toast(err.message, true); }
+};
+function escWeekKey(){ const y = Number($('escYear').value), w = Number($('escWeek').value); return (y>2000 && w>=1 && w<=53) ? `${y}-W${String(w).padStart(2,'0')}` : ''; }
+async function loadEscNeeds(){
+  const wk = escWeekKey(); S.escNeeds = null;
+  if (wk && S.weeks.some(w=>w.week===wk)) { try { S.escNeeds = (await api('getWeek', { week: wk })).needs; } catch(e){} }
+  renderEscTable();
+}
+let escT; $('escWeek').oninput = $('escYear').oninput = () => { clearTimeout(escT); escT = setTimeout(loadEscNeeds, 400); };
+function renderEscTable(){
+  const it = S.escItems, wk = escWeekKey();
+  if (!it) { $('escTable').innerHTML=''; $('escCount').textContent=''; return; }
+  const ex = S.weeks.find(w=>w.week===wk);
+  $('escCount').textContent = t('escCount', { a: it.length });
+  let warn = '';
+  if (ex && ex.escandallo) warn = t('escExists', { w: wkLabel(wk) });
+  const nk = S.escNeeds ? new Set(S.escNeeds.map(n=>akey(n.articulo))) : null;
+  const ek = new Set(it.map(a=>akey(a.articulo)));
+  const miss = S.escNeeds ? S.escNeeds.filter(n=>!ek.has(akey(n.articulo))).map(n=>n.articulo) : [];
+  $('escWarn').innerHTML = esc(warn) + (wk && !S.escNeeds ? (warn?'<br>':'') + esc(t('escNoNeeds', { w: wkLabel(wk) })) : '')
+    + (miss.length ? (warn?'<br>':'') + esc(t('escMissing')) + ' ' + miss.map(esc).join(', ') : '');
+  $('escTable').innerHTML = `<table><thead><tr><th>${t('article')}</th><th>${t('comps')}</th><th>${t('stemsBunch')}</th><th>${t('inPlan')}</th></tr></thead><tbody>
+    ${it.map(a=>`<tr><td>${esc(a.articulo)}</td><td>${a.comps.length}</td><td>${fmt(a.comps.reduce((s,c)=>s+c.unidades,0))}</td>
+    <td>${nk ? (nk.has(akey(a.articulo)) ? `<span class="ok">✓</span>` : `<span class="muted">${t('notInWeek')}</span>`) : '—'}</td></tr>`).join('')}</tbody></table>`;
+}
+$('bUploadEsc').onclick = async () => {
+  const wk = escWeekKey(); if (!wk) { toast(t('badWeek'), true); return; }
+  if (!S.escItems || !S.escItems.length) { toast(t('noneSel'), true); return; }
+  if (!await confirmBox(t('confirmEsc', { w: wkLabel(wk), n: S.escItems.length }))) return;
+  try {
+    const r = await api('uploadEsc', { week: wk, items: S.escItems });
+    S.weeks = r.weeks; renderWeeks();
+    S.escItems = null; $('fileEsc').value=''; $('escCfg').classList.add('hidden');
+    toast(t('saved'));
+  } catch(e){ toast(errMsg(e), true); }
+};
+
+/* ====== ARCHIVOS ====== */
+function fillWeekSel(sel){
+  const cur = sel.value || S.active || (S.weeks[0]||{}).week || '';
+  sel.innerHTML = S.weeks.map(w => `<option value="${esc(w.week)}">${esc(wkLabel(w.week))}${w.week===S.active?' ('+t('isActive')+')':''}</option>`).join('');
+  sel.value = cur;
+}
+async function loadFiles(){ const w = $('fWeek').value; S.files = w ? await api('files', { week: w }) : null; renderFiles(); }
+$('fWeek').onchange = () => loadFiles().catch(e=>toast(errMsg(e),true));
+$('bFRefresh').onclick = () => loadFiles().then(()=>toast(t('refreshed'))).catch(e=>toast(errMsg(e),true));
+function renderFiles(){
+  const F = S.files;
+  // Necesidades: tabla igual que «Ordenar producción»
+  if (!F || !F.nec.length) { $('fNecInfo').textContent = ''; $('fNec').innerHTML = `<p class="muted">${t('fNoNec')}</p>`; }
+  else {
+    const sub = F.nec.reduce((m,r)=> r.subido>m ? r.subido : m, '');
+    const old = !F.nec.some(r => !r.visible) && F.nec.every(r => !r.bloque);
+    $('fNecInfo').innerHTML = esc(t('fUploaded', { d: sub })) + ' · ' + esc(t('fNecCount', { n: F.nec.length })) + (old ? `<br><span class="warn">${esc(t('fOld'))}</span>` + (S.role==='admin' ? ` <button class="lnk" style="color:var(--tx)" id="goUp">${t('goUp')}</button>` : '') : '');
+    const g = $('goUp'); if (g) g.onclick = () => openTab('up');
+    let i = 0, last = null, h = '';
+    F.nec.forEach(r => {
+      if (last !== null && r.bloque !== last) { h += `<tr class="sp ${i%2?'od':'ev'}"><td colspan="6">&nbsp;</td></tr>`; i++; }
+      last = r.bloque;
+      h += `<tr class="${i%2?'od':'ev'}"><td>${r.pc}</td><td>${esc(r.articulo)}</td><td>${Number(r.unidades).toLocaleString('es-ES')}</td><td>${r.carros}</td><td>${r.cubos}</td><td>${r.paquetes}</td></tr>`; i++;
+    });
+    $('fNec').innerHTML = `<table class="xl"><thead><tr><th>P/c</th><th>Nombre</th><th>Unidades</th><th>Carros</th><th>Cubos</th><th>Paquetes</th></tr></thead><tbody>${h}</tbody></table>`;
+  }
+  // Escandallo: dos columnas igual que «Ordenar producción»
+  if (!F || !F.esc.length) { $('fEscInfo').textContent = ''; $('fEsc').innerHTML = `<p class="muted">${t('fNoEsc')}</p>`; return; }
+  const sub = F.esc.reduce((m,a)=> a.subido>m ? a.subido : m, '');
+  $('fEscInfo').textContent = t('fUploaded', { d: sub }) + ' · ' + t('fEscCount', { n: F.esc.length });
+  const L = F.esc.filter(a => a.lado === 'I'), R = F.esc.filter(a => a.lado === 'D'), X = F.esc.filter(a => a.lado === 'X');
+  const tbl = arts => `<table class="esct"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
+    <thead><tr><th>Nombre</th><th>Componente</th><th>Nombre comp.</th><th>Ud.</th></tr></thead><tbody>
+    ${arts.map(a => `<tr class="ah"><td colspan="4">${esc(a.articulo)}</td></tr>` + a.comps.map(c => `<tr><td></td><td class="cc">${esc(c.codigo)}</td><td>${esc(c.componente)}</td><td class="cu">${fmt(c.unidades)}</td></tr>`).join('')).join('')}
+    </tbody></table>`;
+  $('fEsc').innerHTML = (R.length
+    ? `<div class="esc2"><div><div class="esct-title">${t('fLeft', { n: L.length })}</div>${tbl(L)}</div><div><div class="esct-title">${t('fRight', { n: R.length })}</div>${tbl(R)}</div></div>`
+    : tbl(L))
+    + (X.length ? `<div class="escx"><div class="esct-title" style="color:#b06000">${t('fExcl', { n: X.length })}</div><div class="escx-t">${tbl(X)}</div></div>` : '');
+}
+
+/* ====== INICIO ====== */
+renderLang();
+if (S.pwd) login(S.pwd, true);
+</script>
+</body>
+</html>
