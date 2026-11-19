@@ -6,7 +6,7 @@
 <title>Control de Producción</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--tx:#1b2026;--mu:#7d8790;--ln:#eceef1;--bg:#f4f5f7;--soft:#fafbfc;--red:#e04848;--redS:#fdecec;--grn:#1f9d55;--grnS:#e3f5ea;--or:#d9822b}
+:root{--tx:#1b2026;--mu:#7d8790;--ln:#eceef1;--bg:#f4f5f7;--soft:#fafbfc;--red:#c62828;--redS:#fbe9e9;--grn:#2e7d32;--grnT:#1b5e20;--grnS:#e5f1e6;--grnBar:#2e7d32;--or:#d9822b}
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:15px}
 button{font:inherit;cursor:pointer}
@@ -72,10 +72,11 @@ main{max-width:1150px;margin:0 auto;padding:1rem}
 .nores{padding:1.5rem 1.6rem;color:var(--mu)}
 .r2{display:grid;grid-template-columns:minmax(0,1fr) 120px;grid-template-areas:"i b" "s b" "p b";gap:.35rem 1.2rem;padding:.9rem 1.6rem;border-bottom:1px solid var(--ln);align-items:center}
 .r2 .info{grid-area:i;min-width:0;cursor:pointer}.r2 .stk{grid-area:s}.r2 .pr{grid-area:p;display:flex;align-items:center;gap:.8rem}.r2 .pr .bar{flex:1}.r2 .bar i{background:var(--c)}
-.r2 .btn{grid-area:b;padding:.95rem 0;font-size:1rem}.r2.done .btn{background:#fff;color:var(--tx)}
+.r2 .btn{grid-area:b;padding:.95rem 0;font-size:1rem}
+#prodGrid .r2.done{background:#eff1f3}.r2.done .btn{background:#fff;color:var(--tx)}
 .r2 .n{font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:.5rem;white-space:nowrap}
 .r2 .n .nm{overflow:hidden;text-overflow:ellipsis}.r2 .n .ic{flex:none;width:16px;height:16px;color:var(--mu)}
-.r2 .info:hover .nm{text-decoration:underline}
+.r2{cursor:pointer}.r2:hover .nm{text-decoration:underline}.r2 .btn{cursor:pointer}
 .pcb{margin-left:auto;flex:none;font-size:.95rem;font-weight:600;color:var(--tx);background:var(--ln);border-radius:8px;padding:.2rem .6rem}
 .pcb b{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:1.05rem}
 .stk{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:.2rem .7rem}
@@ -191,6 +192,7 @@ main{max-width:1150px;margin:0 auto;padding:1rem}
 #mHist li.tot{font-weight:700;border-bottom:0;border-top:2px solid var(--tx)}
 .mx{position:absolute;top:.7rem;right:.7rem;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--ln);background:#fff;font-size:1.6rem;line-height:1;color:var(--tx);display:flex;align-items:center;justify-content:center;padding:0 0 3px}
 .mx:hover{border-color:var(--tx)}
+.bcomp{border:3px solid var(--grn);color:var(--grn)}
 .preview{font-size:.9rem;color:#5b6470;margin-bottom:1rem;min-height:1.2em}
 .sep{border:0;border-top:1px dashed #d6dae0;margin:1rem 0}
 .mact{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem}
@@ -366,6 +368,7 @@ details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
     </div>
     <div class="calc" id="mCalc"></div>
     <div class="preview" id="mPrev"></div>
+    <button class="btn sec bcomp" id="mComplete" style="width:100%;margin-bottom:.6rem"></button>
     <button class="btn" id="mSaveAdd" style="width:100%" data-t="saveAdd"></button>
     <div class="hist"><div class="histh" data-t="history"></div><ul id="mHist"></ul></div>
   </div>
@@ -401,12 +404,12 @@ details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
 
 <script>
 /* ====== CONFIGURACIÓN ====== */
-const NEED_SRV = 5; // versión mínima de Code.gs que necesita esta app
+const NEED_SRV = 7; // versión mínima de Code.gs que necesita esta app
 const API_URL = 'https://script.google.com/macros/s/AKfycbwhRSY2qFgrgKQxpo-Q5zPSGlHNCnWqG_RTtFF-_BpZv-_DajVzuDtVUD2yVDwlZBbiwA/exec';
 
 /* ====== TEXTOS ====== */
 const T = {
- es:{appTitle:'Control de Producción',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
+ es:{appTitle:'Control de Producción',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',markDone:'Marcar como completado',markDoneQ:'¿Marcar {a} como completado? Se anotarán {c}.',m_completo:'completado',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
   tProd:'Producción',tRes:'Resultados',tUp:'Necesidades',tFiles:'Archivos',refreshed:'Datos actualizados desde el Sheets',goUp:'Ir a Necesidades para subirlo',fNecTitle:'Necesidades de producción',fEscTitle:'Escandallo',fNoNec:'No hay necesidades cargadas para esta semana.',fNoEsc:'No hay escandallo cargado para esta semana.',fUploaded:'Subido el {d}',fNecCount:'{n} filas',fEscCount:'{n} artículos',fLeft:'Columna izquierda ({n} artículos)',fRight:'Columna derecha ({n} artículos)',fExcl:'Artículos no incluidos en el resultado ({n})',fOld:'Esta semana se subió antes de guardar todas las filas del Excel: solo se ven los ramos que se marcaron. Vuelve a subir el archivo para verlo completo.',week:'Semana',year:'Año',weekNum:'Nº semana',refresh:'Actualizar',export:'Exportar a Excel',
   noActive:'Todavía no hay necesidades de producción cargadas.',planned:'Previsto',made:'Fabricado',pending:'Pendiente',progress:'Cumplimiento',
   all:'Todos',onlyPending:'Pendientes',left:'Faltan',done:'Completado',over:'De más',stP:'Pendiente',stC:'En curso',chP:'pendiente',chC:'en curso',chD:'completados',annotate:'Anotar',madeOf:'fabricados de',plannedW:'previstos',leftW:'faltan',noItems:'No hay ramos con este filtro',lastNotes:'Últimas anotaciones',annul:'Anular',annulled:'anulado',
@@ -419,7 +422,7 @@ const T = {
   weeksTitle:'Semanas cargadas',escTitle:'Subir escandallo',escHelp:'Selecciona el Excel de escandallos de la semana. Al tocar un artículo en Producción se verá su composición. Si la semana ya tiene escandallo, se sustituye.',escNoHeader:'No encuentro las columnas «nombre», «componente», «nombre», «unidades» en el Excel.',escCount:'{a} artículos con composición',escExists:'La semana {w} ya tiene escandallo: se sustituirá.',escNoNeeds:'La semana {w} todavía no tiene necesidades cargadas.',escMissing:'Artículos de las necesidades sin escandallo:',comps:'Componentes',stemsBunch:'Tallos/ramo',inPlan:'En necesidades',notInWeek:'no está en la semana',confirmEsc:'¿Guardar el escandallo de la semana {w} con {n} artículos?',escCol:'Escandallo',noComp:'No hay escandallo cargado para este artículo en esta semana.',component:'Componente',stem:'Tallo',perBunch:'Ud./ramo',stemsPlanned:'Tallos previstos',stemsLeft:'Tallos que faltan',uploaded:'Subido',items:'Artículos',units:'Unidades',active:'Activa',setActive:'Activar',isActive:'activa',
   article:'Artículo',group:'Grupo',diff:'Diferencia',total:'TOTAL',notInPlan:'fuera de previsión',sel:'Ver',noData:'Sin datos',
   days:['dom','lun','mar','mié','jue','vie','sáb'],confirmUp:'¿Guardar la semana {w} con {n} artículos?'},
- ca:{appTitle:'Control de Producció',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
+ ca:{appTitle:'Control de Producció',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',markDone:'Marcar com a completat',markDoneQ:'Vols marcar {a} com a completat? S’anotaran {c}.',m_completo:'completat',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
   tProd:'Producció',tRes:'Resultats',tUp:'Necessitats',tFiles:'Arxius',refreshed:'Dades actualitzades des del Sheets',goUp:'Anar a Necessitats per pujar-lo',fNecTitle:'Necessitats de producció',fEscTitle:'Escandall',fNoNec:'No hi ha necessitats carregades per a aquesta setmana.',fNoEsc:'No hi ha escandall carregat per a aquesta setmana.',fUploaded:'Pujat el {d}',fNecCount:'{n} files',fEscCount:'{n} articles',fLeft:'Columna esquerra ({n} articles)',fRight:'Columna dreta ({n} articles)',fExcl:'Articles no inclosos al resultat ({n})',fOld:'Aquesta setmana es va pujar abans de desar totes les files de l’Excel: només es veuen els rams que es van marcar. Torna a pujar l’arxiu per veure’l complet.',week:'Setmana',year:'Any',weekNum:'Núm. setmana',refresh:'Actualitzar',export:'Exportar a Excel',
   noActive:'Encara no hi ha necessitats de producció carregades.',planned:'Previst',made:'Fabricat',pending:'Pendent',progress:'Compliment',
   all:'Tots',onlyPending:'Pendents',left:'Falten',done:'Completat',over:'De més',stP:'Pendent',stC:'En curs',chP:'pendent',chC:'en curs',chD:'completats',annotate:'Anotar',madeOf:'fabricats de',plannedW:'previstos',leftW:'falten',noItems:'No hi ha rams amb aquest filtre',lastNotes:'Últimes anotacions',annul:'Anul·lar',annulled:'anul·lat',
@@ -573,12 +576,14 @@ async function loadProd(silent){
 }
 function made(a){ return (S.data && S.data.totals[a]) || 0; }
 function estado(n){ const m = made(n.articulo); return m<=0 ? 'p' : m>=n.unidades ? 'd' : 'c'; }
-function hueFor(p){ return p<.5 ? 24+(48-24)*(p/.5) : 48+(110-48)*((p-.5)/.5); }
+const HUE0 = 16;   // tono con el que empieza la barra «en curso» (naranja)
+const HUE1 = 90;   // tono con el que acaba la barra «en curso» (verde lima); al completarse salta a verde bosque
+function hueFor(p){ return p<.5 ? HUE0+(48-HUE0)*(p/.5) : 48+(HUE1-48)*((p-.5)/.5); }
 function colores(n){
   const e = estado(n);
-  if (e==='p') return { c:'#e04848', ct:'#e04848', cs:'#fdecec' };
-  if (e==='d') return { c:'#1f9d55', ct:'#167a41', cs:'#e3f5ea' };
-  const h = hueFor(made(n.articulo)/n.unidades), S2 = h<55?85:h<90?70:55, L = h<40?48:h<55?44:h<90?40:42;
+  if (e==='p') return RED();
+  if (e==='d') return GREEN();
+  const h = hueFor(made(n.articulo)/n.unidades), S2 = h<55?85:66, L = h<40?48:h<55?44:40;
   return { c:`hsl(${h},${S2}%,${L}%)`, ct:`hsl(${h},${S2}%,${L-12}%)`, cs:`hsl(${h},75%,92%)` };
 }
 function etiqueta(n){
@@ -591,6 +596,9 @@ function ccTxt(cubosTot){   // cubos totales -> «X carros · Y cubos»
   const ca = Math.floor(cubosTot / CUBOS_CARRO), cu = cubosTot % CUBOS_CARRO;
   return `${fmt(ca)}&nbsp;${t(ca===1?'carro1':'carrosL')} · ${fmt(cu)}&nbsp;${t(cu===1?'cubo1':'cubosL')}`;
 }
+const gv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const GREEN = () => ({ c:gv('--grnBar') || gv('--grn'), ct:gv('--grnT'), cs:gv('--grnS') });   // barra en --grnBar; textos en --grn
+const RED = () => ({ c:gv('--red'), ct:gv('--red'), cs:gv('--redS') });   // el verde de «completado» se define una sola vez en :root
 function etiqueta2(n){   // estado sin la cantidad (la cantidad que falta va en «Faltan»)
   const e = estado(n), r = n.unidades - made(n.articulo);
   if (e==='p') return t('stP');
@@ -625,7 +633,7 @@ function renderProd(){
       // solo carros y cubos: el objetivo se redondea a cubos enteros (si hay paquetes sueltos, un cubo más)
       const pc = n.pc > 0 ? n.pc : 0;
       const cuObj = pc ? Math.ceil(n.unidades / pc) : 0, cuHecho = pc ? Math.floor(m / pc) : 0, cuFalta = Math.max(cuObj - cuHecho, 0);
-      return `<div class="r2 ${estado(n)==='d'?'done':''}" style="--c:${k.c};--ct:${k.ct};--cs:${k.cs}">
+      return `<div class="r2 ${estado(n)==='d'?'done':''}" data-c="${esc(n.articulo)}" style="--c:${k.c};--ct:${k.ct};--cs:${k.cs}">
         <div class="info" data-c="${esc(n.articulo)}"><div class="n"><span class="nm">${esc(n.articulo)}</span>${ICON}<span class="pcb">P/c <b>${fmt(n.pc)}</b></span></div></div>
         <div class="stk">
           <div class="sl"><span class="lb">${t('plannedS')}</span><span class="cc">${ccTxt(cuObj)}</span><span class="v mono">${fmt(n.unidades)}</span></div>
@@ -642,7 +650,7 @@ function renderProd(){
 }
 $('prodSum').onclick = e => { const b=e.target.closest('[data-sem]'); if(!b) return; S.sem = S.sem===b.dataset.sem ? null : b.dataset.sem; renderProd(); };
 $('prodFilters').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.pend){ S.onlyPend=true; } else { S.onlyPend=false; S.filter=b.dataset.f; } renderProd(); };
-$('prodGrid').onclick = e => { const c = e.target.closest('[data-a]'); if (c) { openNote(c.dataset.a); return; } const i = e.target.closest('[data-c]'); if (i) openComp(i.dataset.c); };
+$('prodGrid').onclick = e => { const c = e.target.closest('[data-a]'); if (c) { openNote(c.dataset.a); return; } const i = e.target.closest('[data-c]'); if (i) openComp(i.dataset.c); };   // toda la fila abre el escandallo, salvo «Anotar»
 const ICON = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>';
 const akey = s => String(s||'').toUpperCase().replace(/\s+/g,' ').trim();
 function compOf(d, art){ if (!d || !d.esc) return null; const k = akey(art); for (const a in d.esc) if (akey(a)===k) return d.esc[a]; return null; }
@@ -685,9 +693,9 @@ $('prodView').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) r
   $('prodView').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v===S.view));
   $('ramosCard').classList.toggle('hidden', S.view!=='ramos'); $('tallosCard').classList.toggle('hidden', S.view!=='tallos'); };
 function colPct(m, u){
-  if (m<=0) return { c:'#e04848', ct:'#e04848', cs:'#fdecec' };
-  if (m>=u) return { c:'#1f9d55', ct:'#167a41', cs:'#e3f5ea' };
-  const h = hueFor(m/u), S2 = h<55?85:h<90?70:55, L = h<40?48:h<55?44:h<90?40:42;
+  if (m<=0) return RED();
+  if (m>=u) return GREEN();
+  const h = hueFor(m/u), S2 = h<55?85:66, L = h<40?48:h<55?44:40;
   return { c:`hsl(${h},${S2}%,${L}%)`, ct:`hsl(${h},${S2}%,${L-12}%)`, cs:`hsl(${h},75%,92%)` };
 }
 function tallosModel(d){
@@ -770,9 +778,13 @@ function renderHist(){
     return `<li class="${x.q<0?'neg':''} ${x.an?'x':''}"><span class="d">${fechaHist(x.f)}</span><span class="c">${cc} <span class="tag">${esc(t('m_'+x.modo))}</span>${x.an?` <span class="tag">${t('annulled')}</span>`:''}</span><span class="q">${x.q>0?'+':''}${fmt(x.q)}</span></li>`;
   }).join('') + `<li class="tot"><span class="d"></span><span class="c">${t('total')} · ${esc(txtCC(enCC(made(M.a), pc)))}</span><span class="q">${fmt(made(M.a))}</span></li>`;
 }
+function cubosFalta(n){ const pc = n.pc>0 ? n.pc : 0; return pc ? Math.max(Math.ceil(n.unidades/pc) - Math.floor(made(n.articulo)/pc), 0) : 0; }
 function openNote(a){
   const n = S.data.needs.find(x => x.articulo===a); if(!n) return;
   S.modal = { a, n, sg: 1 }; setSign(1); renderHist();
+  const cf = cubosFalta(n);
+  $('mComplete').classList.toggle('hidden', !cf);
+  $('mComplete').innerHTML = `✓ ${t('markDone')} <span style="font-weight:500">(+${ccTxt(cf)})</span>`;
   $('mName').textContent = a; $('mCa').value = 0; $('mCu').value = 0;
   updNote(); $('mNote').classList.remove('hidden');
 }
@@ -792,6 +804,19 @@ $('mCa').oninput = $('mCu').oninput = updNote;
 function closeNote(){ $('mNote').classList.add('hidden'); S.modal = null; }
 $('mClose').onclick = closeNote;
 $('mNote').onclick = e => { if (e.target.id==='mNote') closeNote(); };
+$('mComplete').onclick = async () => {
+  const M = S.modal; if (!M) return;
+  const cf = cubosFalta(M.n); if (!cf) return;
+  const ca = Math.floor(cf / CUBOS_CARRO), cu = cf % CUBOS_CARRO;
+  if (!await confirmBox(t('markDoneQ', { a: M.a, c: ccTxt(cf).replace(/&nbsp;/g,' ') }))) return;
+  $('mComplete').disabled = true;
+  try {
+    const r = await api('add', { week: S.active, articulo: M.a, carros: ca, cubos: cu, signo: 1, completo: true, cantidad: cf * M.n.pc, modo: 'lote' });
+    if (r.nochange) throw new Error(t('notSaved'));
+    S.data = r; closeNote(); renderProd(); toast(t('saved'));
+  } catch(e){ toast(errMsg(e), true); }
+  finally { $('mComplete').disabled = false; }
+};
 $('mSaveAdd').onclick = async () => {
   const M = S.modal; if (!M || !M.add) return;
   $('mSaveAdd').disabled = true;
