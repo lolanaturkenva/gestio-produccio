@@ -145,6 +145,12 @@ main{max-width:1150px;margin:0 auto;padding:1rem}
 .esct td.cc{color:#888;font-size:9pt;white-space:nowrap}.esct td.cu{text-align:right}
 .escx{margin-top:2.5rem;padding-top:1.5rem;border-top:2px dashed var(--ln)}.escx-t{max-width:52%}@media(max-width:800px){.escx-t{max-width:none}}
 .fhead{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.4rem}.fhead h3{margin:0}
+.sumd{border:1px solid var(--ln);border-radius:10px;margin-bottom:.5rem;background:#fff}
+.sumd>summary{cursor:pointer;padding:.65rem .9rem;font-weight:600;font-size:.9rem}
+.sumd[open]>summary{border-bottom:1px solid var(--ln)}
+.sumd table{margin:0}
+.prevh{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin:.6rem 0 .5rem}
+#escTable{overflow:visible}
 .esct-title{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem}.warn{color:var(--or);font-weight:600}
 @media(max-width:700px){
   header{padding:.6rem 1rem;gap:.5rem}header h1{font-size:.95rem}
@@ -412,7 +418,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbwhRSY2qFgrgKQxpo-Q5zPS
 
 /* ====== TEXTOS ====== */
 const T = {
- es:{appTitle:'Control de Producción',exportX:'Exportar Excel',loadingTxt:'Cargando…',retry:'Reintentar',srvErr:'El Apps Script ha devuelto un error. Revisa que esté publicado en su última versión.',slowErr:'El Sheets está tardando demasiado en responder. Inténtalo de nuevo.',renderErr:'Error al mostrar los resultados',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',markDone:'Marcar como completado',markDoneQ:'¿Marcar {a} como completado? Se anotarán {c}.',m_completo:'completado',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
+ es:{appTitle:'Control de Producción',sumTitle:'Resumen por artículo',sumIn:'En las necesidades de la semana ({n})',sumOut:'No están en las necesidades de la semana ({n})',sumAll:'Artículos del escandallo ({n})',preview:'Vista previa (aún no está guardado)',exportX:'Exportar Excel',loadingTxt:'Cargando…',retry:'Reintentar',srvErr:'El Apps Script ha devuelto un error. Revisa que esté publicado en su última versión.',slowErr:'El Sheets está tardando demasiado en responder. Inténtalo de nuevo.',renderErr:'Error al mostrar los resultados',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',markDone:'Marcar como completado',markDoneQ:'¿Marcar {a} como completado? Se anotarán {c}.',m_completo:'completado',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
   tProd:'Producción',tRes:'Resultados',tUp:'Necesidades',tFiles:'Archivos',refreshed:'Datos actualizados desde el Sheets',goUp:'Ir a Necesidades para subirlo',fNecTitle:'Necesidades de producción',fEscTitle:'Escandallo',fNoNec:'No hay necesidades cargadas para esta semana.',fNoEsc:'No hay escandallo cargado para esta semana.',fUploaded:'Subido el {d}',fNecCount:'{n} filas',fEscCount:'{n} artículos',fLeft:'Columna izquierda ({n} artículos)',fRight:'Columna derecha ({n} artículos)',fExcl:'Artículos no incluidos en el resultado ({n})',fNeedNec:'sube las necesidades de esta semana para verlo repartido en dos columnas',fOld:'Esta semana se subió antes de guardar todas las filas del Excel: solo se ven los ramos que se marcaron. Vuelve a subir el archivo para verlo completo.',week:'Semana',year:'Año',weekNum:'Nº semana',refresh:'Actualizar',export:'Exportar a Excel',
   noActive:'Todavía no hay necesidades de producción cargadas.',planned:'Previsto',made:'Fabricado',pending:'Pendiente',progress:'Cumplimiento',
   all:'Todos',onlyPending:'Pendientes',left:'Faltan',done:'Completado',over:'De más',stP:'Pendiente',stC:'En curso',chP:'pendiente',chC:'en curso',chD:'completados',annotate:'Anotar',madeOf:'fabricados de',plannedW:'previstos',leftW:'faltan',noItems:'No hay ramos con este filtro',lastNotes:'Últimas anotaciones',annul:'Anular',annulled:'anulado',
@@ -425,7 +431,7 @@ const T = {
   weeksTitle:'Semanas cargadas',escTitle:'Subir escandallo',escHelp:'Selecciona el Excel de escandallos de la semana. Al tocar un artículo en Producción se verá su composición. Si la semana ya tiene escandallo, se sustituye.',escNoHeader:'No encuentro las columnas «nombre», «componente», «nombre», «unidades» en el Excel.',escCount:'{a} artículos con composición',escExists:'La semana {w} ya tiene escandallo: se sustituirá.',escNoNeeds:'La semana {w} todavía no tiene necesidades cargadas.',escMissing:'Artículos de las necesidades sin escandallo:',comps:'Componentes',stemsBunch:'Tallos/ramo',inPlan:'En necesidades',notInWeek:'no está en la semana',confirmEsc:'¿Guardar el escandallo de la semana {w} con {n} artículos?',escCol:'Escandallo',noComp:'No hay escandallo cargado para este artículo en esta semana.',component:'Componente',stem:'Tallo',perBunch:'Ud./ramo',stemsPlanned:'Tallos previstos',stemsLeft:'Tallos que faltan',uploaded:'Subido',items:'Artículos',units:'Unidades',active:'Activa',setActive:'Activar',isActive:'activa',
   article:'Artículo',group:'Grupo',diff:'Diferencia',total:'TOTAL',notInPlan:'fuera de previsión',sel:'Ver',noData:'Sin datos',
   days:['dom','lun','mar','mié','jue','vie','sáb'],confirmUp:'¿Guardar la semana {w} con {n} artículos?'},
- ca:{appTitle:'Control de Producció',exportX:'Exportar Excel',loadingTxt:'Carregant…',retry:'Tornar-ho a provar',srvErr:'L’Apps Script ha retornat un error. Revisa que estigui publicat en la darrera versió.',slowErr:'El Sheets triga massa a respondre. Torna-ho a provar.',renderErr:'Error en mostrar els resultats',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',markDone:'Marcar com a completat',markDoneQ:'Vols marcar {a} com a completat? S’anotaran {c}.',m_completo:'completat',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
+ ca:{appTitle:'Control de Producció',sumTitle:'Resum per article',sumIn:'A les necessitats de la setmana ({n})',sumOut:'No són a les necessitats de la setmana ({n})',sumAll:'Articles de l’escandall ({n})',preview:'Vista prèvia (encara no està desat)',exportX:'Exportar Excel',loadingTxt:'Carregant…',retry:'Tornar-ho a provar',srvErr:'L’Apps Script ha retornat un error. Revisa que estigui publicat en la darrera versió.',slowErr:'El Sheets triga massa a respondre. Torna-ho a provar.',renderErr:'Error en mostrar els resultats',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',markDone:'Marcar com a completat',markDoneQ:'Vols marcar {a} com a completat? S’anotaran {c}.',m_completo:'completat',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
   tProd:'Producció',tRes:'Resultats',tUp:'Necessitats',tFiles:'Arxius',refreshed:'Dades actualitzades des del Sheets',goUp:'Anar a Necessitats per pujar-lo',fNecTitle:'Necessitats de producció',fEscTitle:'Escandall',fNoNec:'No hi ha necessitats carregades per a aquesta setmana.',fNoEsc:'No hi ha escandall carregat per a aquesta setmana.',fUploaded:'Pujat el {d}',fNecCount:'{n} files',fEscCount:'{n} articles',fLeft:'Columna esquerra ({n} articles)',fRight:'Columna dreta ({n} articles)',fExcl:'Articles no inclosos al resultat ({n})',fNeedNec:'puja les necessitats d’aquesta setmana per veure’l repartit en dues columnes',fOld:'Aquesta setmana es va pujar abans de desar totes les files de l’Excel: només es veuen els rams que es van marcar. Torna a pujar l’arxiu per veure’l complet.',week:'Setmana',year:'Any',weekNum:'Núm. setmana',refresh:'Actualitzar',export:'Exportar a Excel',
   noActive:'Encara no hi ha necessitats de producció carregades.',planned:'Previst',made:'Fabricat',pending:'Pendent',progress:'Compliment',
   all:'Tots',onlyPending:'Pendents',left:'Falten',done:'Completat',over:'De més',stP:'Pendent',stC:'En curs',chP:'pendent',chC:'en curs',chD:'completats',annotate:'Anotar',madeOf:'fabricats de',plannedW:'previstos',leftW:'falten',noItems:'No hi ha rams amb aquest filtre',lastNotes:'Últimes anotacions',annul:'Anul·lar',annulled:'anul·lat',
@@ -456,17 +462,28 @@ const wkLabel = w => { const m = /^(\d{4})-W(\d{2})$/.exec(w||''); return m ? 'W
 
 /* ====== API ====== */
 let busy = 0;
+let _ldEnd = null;
 function loading(on){
   busy += on?1:-1; const L = $('loader');
-  if (on && busy===1) { L.classList.remove('hidden','end','on'); void L.offsetWidth; L.classList.add('on'); }
-  if (!on && busy<=0) { busy = 0; L.classList.remove('on'); L.classList.add('end'); }
+  if (on) {
+    clearTimeout(_ldEnd);
+    if (!L.classList.contains('on')) {   // si ya avanza, sigue sin volver a cero
+      L.style.transition = 'none'; L.classList.remove('hidden','end'); void L.offsetWidth;   // vuelve a 0 al instante, sin animación hacia atrás
+      L.style.transition = ''; L.classList.add('on');
+    }
+  } else if (busy <= 0) {
+    busy = 0;
+    clearTimeout(_ldEnd);
+    _ldEnd = setTimeout(() => { if (busy === 0) { L.classList.remove('on'); L.classList.add('end'); } }, 150);   // espera por si enseguida empieza otra petición
+  }
 }
 async function api(action, data = {}, pwd, quiet){   // quiet: sin barra de carga (actualizaciones automáticas)
   if (!quiet) loading(true);
   try {
     let lastErr;
-    for (let i = 0; i < 2; i++) {
-      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 30000);   // como máximo 30 s por intento
+    for (let i = 0; i < 3; i++) {
+      // el Apps Script contesta en 1–4 s; si en 8 s no llega nada la petición se ha quedado colgada en Google y se repite
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), i < 2 ? 8000 : 15000);
       try {
         const r = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, signal: ctl.signal,
           body: JSON.stringify(Object.assign({ action, pwd: pwd ?? S.pwd }, data)) });
@@ -474,7 +491,7 @@ async function api(action, data = {}, pwd, quiet){   // quiet: sin barra de carg
         try { j = JSON.parse(txt); } catch(pe) { const e = new Error(t('srvErr')); e.server = true; e.detail = txt.slice(0, 300); throw e; }
         if (!j.ok) { const e = new Error(j.error||'Error'); e.server = true; throw e; }
         return j;
-      } catch (e) { lastErr = e; if (e.server) throw e; await new Promise(r => setTimeout(r, 800*(i+1))); }
+      } catch (e) { lastErr = e; if (e.server) throw e; if (i < 2) await new Promise(r => setTimeout(r, 300)); }
       finally { clearTimeout(to); }
     }
     throw new Error(lastErr && lastErr.name === 'AbortError' ? t('slowErr') : t('netErr'));
@@ -527,7 +544,7 @@ async function login(pwd, silent){
     catch (e) { if (e.server && /desconocida/i.test(e.message)) { r = await api('login', {}, pwd); r.legacy = true; } else throw e; }
     if (my !== loginSeq) return;   // se ha iniciado otro acceso: se ignora este
     S.pwd = pwd; S.role = r.role; S.active = r.active; S.srvVersion = r.version || 0; lsSet('cp_pwd', pwd);
-    if (!r.legacy) { S.weeks = r.weeks || []; S.data = r.data || null; S.fresh = Date.now(); saveCache(); }
+    if (!r.legacy) { S.weeks = r.weeks || []; S.weeksAt = Date.now(); S.data = r.data || null; S.fresh = Date.now(); saveCache(); }
     enterApp(); renderTabs(); await openTab(S.tab);
     if (S.role === 'admin' && S.srvVersion < NEED_SRV) toast(t('oldSrv'), true);
   } catch (e) {
@@ -568,7 +585,7 @@ async function openTab(k){
   try {
     if (k==='prod') { $('sProd').classList.remove('hidden'); await loadProd(); S.poll = setInterval(() => { if(!S.modal && !S.compOpen && !document.hidden) loadProd(true); }, 30000); }
     if (k==='res')  { $('sRes').classList.remove('hidden'); $('resTable').innerHTML = `<p class="muted">${t('loadingTxt')}</p>`; await loadWeeks(); fillResWeek(); await loadRes(); }
-    if (k==='up')   { $('sUp').classList.remove('hidden'); await loadWeeks(); renderWeeks(); }
+    if (k==='up')   { $('sUp').classList.remove('hidden'); renderWeeks(); await loadWeeks(true); renderWeeks(); }
     if (k==='files'){ $('sFiles').classList.remove('hidden'); await loadWeeks(); fillWeekSel($('fWeek')); await loadFiles(); }
   } catch(e){
     toast(errMsg(e), true);
@@ -581,7 +598,7 @@ function renderCurrent(){ if(S.tab==='prod') renderProd(); if(S.tab==='res') { f
 async function loadProd(silent){
   try {
     if (S.fresh && Date.now() - S.fresh < 5000) { S.fresh = 0; renderProd(); return; }   // recién cargado con «init» (solo se aprovecha una vez)
-    if (!silent) { const w = await api('weeks'); S.weeks = w.weeks; S.active = w.active || (w.weeks[0]||{}).week || ''; renderTabs(); }
+    if (!silent) { await loadWeeks(); S.active = S.active || (S.weeks[0]||{}).week || ''; renderTabs(); }
     if (!S.active) { S.data = null; renderProd(); return; }
     S.data = await api('getWeek', { week: S.active }, undefined, silent);
     renderProd(); saveCache();
@@ -847,7 +864,9 @@ $('mSaveAdd').onclick = async () => {
 };
 
 /* ====== RESULTADOS ====== */
-async function loadWeeks(){ const w = await api('weeks'); S.weeks = w.weeks; S.active = w.active || S.active; renderTabs(); }
+async function loadWeeks(force){
+  if (!force && S.weeks && S.weeks.length && S.weeksAt && Date.now() - S.weeksAt < 60000) return;   // ya cargadas hace menos de 1 min
+  const w = await api('weeks'); S.weeksAt = Date.now(); S.weeks = w.weeks; S.active = w.active || S.active; renderTabs(); }
 function fillResWeek(){
   const sel = $('resWeek'), cur = sel.value || S.active || (S.weeks[0]||{}).week || '';
   sel.innerHTML = S.weeks.map(w => `<option value="${esc(w.week)}">${esc(wkLabel(w.week))}${w.week===S.active?' ('+t('isActive')+')':''}</option>`).join('');
@@ -965,7 +984,7 @@ $('bUpload').onclick = async () => {
   if (!await confirmBox(t('confirmUp', { w: wkLabel(wk), n: items.length }))) return;
   try {
     const r = await api('upload', { week: wk, items: S.upItems.map(({sel,...x})=>Object.assign(x, { visible: !!sel })) });
-    S.weeks = r.weeks; S.active = r.active; renderTabs(); renderWeeks();
+    S.weeks = r.weeks; S.weeksAt = Date.now(); S.active = r.active; renderTabs(); renderWeeks();
     S.upItems = null; $('file').value=''; $('upCfg').classList.add('hidden');
     toast(t('saved'));
   } catch(e){ toast(errMsg(e), true); }
@@ -1060,7 +1079,8 @@ $('fileEsc').onchange = async e => {
 function escWeekKey(){ const y = Number($('escYear').value), w = Number($('escWeek').value); return (y>2000 && w>=1 && w<=53) ? `${y}-W${String(w).padStart(2,'0')}` : ''; }
 async function loadEscNeeds(){
   const wk = escWeekKey(); S.escNeeds = null;
-  if (wk && S.weeks.some(w=>w.week===wk)) { try { S.escNeeds = (await api('getWeek', { week: wk })).needs; } catch(e){} }
+  S.escNec = null;
+  if (wk && S.weeks.some(w=>w.week===wk)) { try { const f = await api('files', { week: wk }); S.escNec = f.nec; S.escNeeds = f.nec.filter(r => r.visible); } catch(e){} }
   renderEscTable();
 }
 let escT; $('escWeek').oninput = $('escYear').oninput = () => { clearTimeout(escT); escT = setTimeout(loadEscNeeds, 400); };
@@ -1076,9 +1096,20 @@ function renderEscTable(){
   const miss = S.escNeeds ? S.escNeeds.filter(n=>!ek.has(akey(n.articulo))).map(n=>n.articulo) : [];
   $('escWarn').innerHTML = esc(warn) + (wk && !S.escNeeds ? (warn?'<br>':'') + esc(t('escNoNeeds', { w: wkLabel(wk) })) : '')
     + (miss.length ? (warn?'<br>':'') + esc(t('escMissing')) + ' ' + miss.map(esc).join(', ') : '');
-  $('escTable').innerHTML = `<table><thead><tr><th>${t('article')}</th><th>${t('comps')}</th><th>${t('stemsBunch')}</th><th>${t('inPlan')}</th></tr></thead><tbody>
-    ${it.map(a=>`<tr><td>${esc(a.articulo)}</td><td>${a.comps.length}</td><td>${fmt(a.comps.reduce((s,c)=>s+c.unidades,0))}</td>
-    <td>${nk ? (nk.has(akey(a.articulo)) ? `<span class="ok">✓</span>` : `<span class="muted">${t('notInWeek')}</span>`) : '—'}</td></tr>`).join('')}</tbody></table>`;
+  // vista previa igual que en Archivos: repartido en dos columnas si ya hay necesidades de esa semana
+  let E = it;
+  if (!E.some(a => a.lado === 'D' || a.lado === 'X')) E = S.escNec && S.escNec.length ? layoutEsc(E, ordenarNec(S.escNec)) : E.map(a => Object.assign({}, a, { lado:'I' }));
+  const L = E.filter(a => a.lado === 'I'), R = E.filter(a => a.lado === 'D'), X = E.filter(a => a.lado === 'X');
+  // resumen por artículo (desplegable); los que no están en las necesidades de la semana, plegados
+  const fila = a => `<tr><td>${esc(a.articulo)}</td><td>${a.comps.length}</td><td>${fmt(a.comps.reduce((s,c)=>s+c.unidades,0))}</td></tr>`;
+  const tabla = arr => `<table><thead><tr><th>${t('article')}</th><th>${t('comps')}</th><th>${t('stemsBunch')}</th></tr></thead><tbody>${arr.map(fila).join('')}</tbody></table>`;
+  let res;
+  if (nk) {
+    const si = it.filter(a => nk.has(akey(a.articulo))), no = it.filter(a => !nk.has(akey(a.articulo)));
+    res = `<details class="sumd" open><summary>${t('sumIn', { n: si.length })}</summary>${si.length ? tabla(si) : `<p class="muted">—</p>`}</details>`
+        + (no.length ? `<details class="sumd"><summary>${t('sumOut', { n: no.length })}</summary>${tabla(no)}</details>` : '');
+  } else res = `<details class="sumd"><summary>${t('sumAll', { n: it.length })}</summary>${tabla(it)}</details>`;
+  $('escTable').innerHTML = `<div class="prevh">${t('sumTitle')}</div>${res}<div class="prevh" style="margin-top:1.4rem">${t('preview')}</div>` + escHtml(L, R, X);
 }
 $('bUploadEsc').onclick = async () => {
   const wk = escWeekKey(); if (!wk) { toast(t('badWeek'), true); return; }
@@ -1086,7 +1117,7 @@ $('bUploadEsc').onclick = async () => {
   if (!await confirmBox(t('confirmEsc', { w: wkLabel(wk), n: S.escItems.length }))) return;
   try {
     const r = await api('uploadEsc', { week: wk, items: S.escItems, archivo: S.escFile || '' });
-    S.weeks = r.weeks; renderWeeks();
+    S.weeks = r.weeks; S.weeksAt = Date.now(); renderWeeks();
     S.escItems = null; $('fileEsc').value=''; $('escCfg').classList.add('hidden');
     toast(t('saved'));
   } catch(e){ toast(errMsg(e), true); }
@@ -1149,6 +1180,16 @@ function layoutEsc(esc, nec){
   return [...L.map(a => Object.assign({}, a, { lado:'I' })), ...R.map(a => Object.assign({}, a, { lado:'D' })),
           ...esc.filter(a => !main.has(up(a.articulo))).map(a => Object.assign({}, a, { lado:'X' }))];
 }
+function escHtml(L, R, X){   // escandallo en dos columnas + bloque inferior, como «Ordenar producción»
+  const tbl = arts => `<table class="esct"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
+    <thead><tr><th>Nombre</th><th>Componente</th><th>Nombre comp.</th><th>Ud.</th></tr></thead><tbody>
+    ${arts.map(a => `<tr class="ah"><td colspan="4">${esc(a.articulo)}</td></tr>` + a.comps.map(c => `<tr><td></td><td class="cc">${esc(c.codigo)}</td><td>${esc(c.componente)}</td><td class="cu">${fmt(c.unidades)}</td></tr>`).join('')).join('')}
+    </tbody></table>`;
+  return (R.length
+    ? `<div class="esc2"><div><div class="esct-title">${t('fLeft', { n: L.length })}</div>${tbl(L)}</div><div><div class="esct-title">${t('fRight', { n: R.length })}</div>${tbl(R)}</div></div>`
+    : tbl(L))
+    + (X.length ? `<div class="escx"><div class="esct-title" style="color:#b06000">${t('fExcl', { n: X.length })}</div><div class="escx-t">${tbl(X)}</div></div>` : '');
+}
 function renderFiles(){
   const F = S.files;
   S.fileView = { week: F && F.week };
@@ -1179,14 +1220,7 @@ function renderFiles(){
   if (!E.some(a => a.lado === 'D' || a.lado === 'X') && !F.nec.length) $('fEscInfo').textContent += ' · ' + t('fNeedNec');
   const L = E.filter(a => a.lado === 'I'), R = E.filter(a => a.lado === 'D'), X = E.filter(a => a.lado === 'X');
   S.fileView.esc = { L, R, X, archivo: (F.esc.find(a => a.archivo) || {}).archivo || '' };
-  const tbl = arts => `<table class="esct"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
-    <thead><tr><th>Nombre</th><th>Componente</th><th>Nombre comp.</th><th>Ud.</th></tr></thead><tbody>
-    ${arts.map(a => `<tr class="ah"><td colspan="4">${esc(a.articulo)}</td></tr>` + a.comps.map(c => `<tr><td></td><td class="cc">${esc(c.codigo)}</td><td>${esc(c.componente)}</td><td class="cu">${fmt(c.unidades)}</td></tr>`).join('')).join('')}
-    </tbody></table>`;
-  $('fEsc').innerHTML = (R.length
-    ? `<div class="esc2"><div><div class="esct-title">${t('fLeft', { n: L.length })}</div>${tbl(L)}</div><div><div class="esct-title">${t('fRight', { n: R.length })}</div>${tbl(R)}</div></div>`
-    : tbl(L))
-    + (X.length ? `<div class="escx"><div class="esct-title" style="color:#b06000">${t('fExcl', { n: X.length })}</div><div class="escx-t">${tbl(X)}</div></div>` : '');
+  $('fEsc').innerHTML = escHtml(L, R, X);
 }
 
 /* ====== EXPORTAR A EXCEL (idéntico a «Ordenar producción») ====== */
