@@ -144,6 +144,7 @@ main{max-width:1150px;margin:0 auto;padding:1rem}
 .esct tr.ah td{background:#D9E1F2;font-weight:bold;padding-top:4px;padding-bottom:2px;white-space:nowrap}
 .esct td.cc{color:#888;font-size:9pt;white-space:nowrap}.esct td.cu{text-align:right}
 .escx{margin-top:2.5rem;padding-top:1.5rem;border-top:2px dashed var(--ln)}.escx-t{max-width:52%}@media(max-width:800px){.escx-t{max-width:none}}
+.fhead{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.4rem}.fhead h3{margin:0}
 .esct-title{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem}.warn{color:var(--or);font-weight:600}
 @media(max-width:700px){
   header{padding:.6rem 1rem;gap:.5rem}header h1{font-size:.95rem}
@@ -223,8 +224,10 @@ details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
 .kpi .bar{margin-top:.4rem}.kpi .bar i{background:var(--tx)}
 .toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);background:var(--tx);color:#fff;padding:.6rem 1.1rem;border-radius:8px;z-index:90;font-size:.9rem}
 .toast.e{background:var(--red)}
-.load{position:fixed;top:0;left:0;height:3px;background:var(--grn);z-index:99;animation:ld 1.2s infinite}
-@keyframes ld{0%{width:0}100%{width:100%}}
+/* barra de carga: avanza despacio una sola vez y se desvanece al terminar */
+.load{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grn);z-index:99;opacity:0;transition:width 8s cubic-bezier(.1,.6,.2,1),opacity .4s}
+.load.on{width:85%;opacity:1}
+.load.end{width:100%;opacity:0;transition:width .25s,opacity .5s .2s}
 .offrow td{color:#999}
 .tag{font-size:.7rem;padding:.05rem .4rem;border-radius:4px;background:var(--ln);color:#555;margin-left:.3rem}
 </style>
@@ -300,12 +303,12 @@ details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
         </div>
       </div>
       <div class="panel">
-        <h3 style="margin-top:0" data-t="fNecTitle"></h3>
+        <div class="fhead"><h3 data-t="fNecTitle"></h3><button class="btn sec" id="bXNec" data-t="exportX"></button></div>
         <p class="muted" id="fNecInfo"></p>
         <div class="tw" id="fNec"></div>
       </div>
       <div class="panel">
-        <h3 style="margin-top:0" data-t="fEscTitle"></h3>
+        <div class="fhead"><h3 data-t="fEscTitle"></h3><button class="btn sec" id="bXEsc" data-t="exportX"></button></div>
         <p class="muted" id="fEscInfo"></p>
         <div id="fEsc"></div>
       </div>
@@ -404,13 +407,13 @@ details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
 
 <script>
 /* ====== CONFIGURACIÓN ====== */
-const NEED_SRV = 7; // versión mínima de Code.gs que necesita esta app
+const NEED_SRV = 8; // versión mínima de Code.gs que necesita esta app
 const API_URL = 'https://script.google.com/macros/s/AKfycbwhRSY2qFgrgKQxpo-Q5zPSGlHNCnWqG_RTtFF-_BpZv-_DajVzuDtVUD2yVDwlZBbiwA/exec';
 
 /* ====== TEXTOS ====== */
 const T = {
- es:{appTitle:'Control de Producción',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',markDone:'Marcar como completado',markDoneQ:'¿Marcar {a} como completado? Se anotarán {c}.',m_completo:'completado',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
-  tProd:'Producción',tRes:'Resultados',tUp:'Necesidades',tFiles:'Archivos',refreshed:'Datos actualizados desde el Sheets',goUp:'Ir a Necesidades para subirlo',fNecTitle:'Necesidades de producción',fEscTitle:'Escandallo',fNoNec:'No hay necesidades cargadas para esta semana.',fNoEsc:'No hay escandallo cargado para esta semana.',fUploaded:'Subido el {d}',fNecCount:'{n} filas',fEscCount:'{n} artículos',fLeft:'Columna izquierda ({n} artículos)',fRight:'Columna derecha ({n} artículos)',fExcl:'Artículos no incluidos en el resultado ({n})',fOld:'Esta semana se subió antes de guardar todas las filas del Excel: solo se ven los ramos que se marcaron. Vuelve a subir el archivo para verlo completo.',week:'Semana',year:'Año',weekNum:'Nº semana',refresh:'Actualizar',export:'Exportar a Excel',
+ es:{appTitle:'Control de Producción',exportX:'Exportar Excel',loadingTxt:'Cargando…',retry:'Reintentar',srvErr:'El Apps Script ha devuelto un error. Revisa que esté publicado en su última versión.',slowErr:'El Sheets está tardando demasiado en responder. Inténtalo de nuevo.',renderErr:'Error al mostrar los resultados',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',markDone:'Marcar como completado',markDoneQ:'¿Marcar {a} como completado? Se anotarán {c}.',m_completo:'completado',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
+  tProd:'Producción',tRes:'Resultados',tUp:'Necesidades',tFiles:'Archivos',refreshed:'Datos actualizados desde el Sheets',goUp:'Ir a Necesidades para subirlo',fNecTitle:'Necesidades de producción',fEscTitle:'Escandallo',fNoNec:'No hay necesidades cargadas para esta semana.',fNoEsc:'No hay escandallo cargado para esta semana.',fUploaded:'Subido el {d}',fNecCount:'{n} filas',fEscCount:'{n} artículos',fLeft:'Columna izquierda ({n} artículos)',fRight:'Columna derecha ({n} artículos)',fExcl:'Artículos no incluidos en el resultado ({n})',fNeedNec:'sube las necesidades de esta semana para verlo repartido en dos columnas',fOld:'Esta semana se subió antes de guardar todas las filas del Excel: solo se ven los ramos que se marcaron. Vuelve a subir el archivo para verlo completo.',week:'Semana',year:'Año',weekNum:'Nº semana',refresh:'Actualizar',export:'Exportar a Excel',
   noActive:'Todavía no hay necesidades de producción cargadas.',planned:'Previsto',made:'Fabricado',pending:'Pendiente',progress:'Cumplimiento',
   all:'Todos',onlyPending:'Pendientes',left:'Faltan',done:'Completado',over:'De más',stP:'Pendiente',stC:'En curso',chP:'pendiente',chC:'en curso',chD:'completados',annotate:'Anotar',madeOf:'fabricados de',plannedW:'previstos',leftW:'faltan',noItems:'No hay ramos con este filtro',lastNotes:'Últimas anotaciones',annul:'Anular',annulled:'anulado',
   annulQ:'¿Anular esta anotación?',yes:'Sí',no:'No',toAdd:'Cantidad a sumar',saveAdd:'Guardar',setTotalLbl:'O escribe el total hecho',saveTotal:'Guardar total',close:'Cerrar',
@@ -422,8 +425,8 @@ const T = {
   weeksTitle:'Semanas cargadas',escTitle:'Subir escandallo',escHelp:'Selecciona el Excel de escandallos de la semana. Al tocar un artículo en Producción se verá su composición. Si la semana ya tiene escandallo, se sustituye.',escNoHeader:'No encuentro las columnas «nombre», «componente», «nombre», «unidades» en el Excel.',escCount:'{a} artículos con composición',escExists:'La semana {w} ya tiene escandallo: se sustituirá.',escNoNeeds:'La semana {w} todavía no tiene necesidades cargadas.',escMissing:'Artículos de las necesidades sin escandallo:',comps:'Componentes',stemsBunch:'Tallos/ramo',inPlan:'En necesidades',notInWeek:'no está en la semana',confirmEsc:'¿Guardar el escandallo de la semana {w} con {n} artículos?',escCol:'Escandallo',noComp:'No hay escandallo cargado para este artículo en esta semana.',component:'Componente',stem:'Tallo',perBunch:'Ud./ramo',stemsPlanned:'Tallos previstos',stemsLeft:'Tallos que faltan',uploaded:'Subido',items:'Artículos',units:'Unidades',active:'Activa',setActive:'Activar',isActive:'activa',
   article:'Artículo',group:'Grupo',diff:'Diferencia',total:'TOTAL',notInPlan:'fuera de previsión',sel:'Ver',noData:'Sin datos',
   days:['dom','lun','mar','mié','jue','vie','sáb'],confirmUp:'¿Guardar la semana {w} con {n} artículos?'},
- ca:{appTitle:'Control de Producció',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',markDone:'Marcar com a completat',markDoneQ:'Vols marcar {a} com a completat? S’anotaran {c}.',m_completo:'completat',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
-  tProd:'Producció',tRes:'Resultats',tUp:'Necessitats',tFiles:'Arxius',refreshed:'Dades actualitzades des del Sheets',goUp:'Anar a Necessitats per pujar-lo',fNecTitle:'Necessitats de producció',fEscTitle:'Escandall',fNoNec:'No hi ha necessitats carregades per a aquesta setmana.',fNoEsc:'No hi ha escandall carregat per a aquesta setmana.',fUploaded:'Pujat el {d}',fNecCount:'{n} files',fEscCount:'{n} articles',fLeft:'Columna esquerra ({n} articles)',fRight:'Columna dreta ({n} articles)',fExcl:'Articles no inclosos al resultat ({n})',fOld:'Aquesta setmana es va pujar abans de desar totes les files de l’Excel: només es veuen els rams que es van marcar. Torna a pujar l’arxiu per veure’l complet.',week:'Setmana',year:'Any',weekNum:'Núm. setmana',refresh:'Actualitzar',export:'Exportar a Excel',
+ ca:{appTitle:'Control de Producció',exportX:'Exportar Excel',loadingTxt:'Carregant…',retry:'Tornar-ho a provar',srvErr:'L’Apps Script ha retornat un error. Revisa que estigui publicat en la darrera versió.',slowErr:'El Sheets triga massa a respondre. Torna-ho a provar.',renderErr:'Error en mostrar els resultats',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',markDone:'Marcar com a completat',markDoneQ:'Vols marcar {a} com a completat? S’anotaran {c}.',m_completo:'completat',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
+  tProd:'Producció',tRes:'Resultats',tUp:'Necessitats',tFiles:'Arxius',refreshed:'Dades actualitzades des del Sheets',goUp:'Anar a Necessitats per pujar-lo',fNecTitle:'Necessitats de producció',fEscTitle:'Escandall',fNoNec:'No hi ha necessitats carregades per a aquesta setmana.',fNoEsc:'No hi ha escandall carregat per a aquesta setmana.',fUploaded:'Pujat el {d}',fNecCount:'{n} files',fEscCount:'{n} articles',fLeft:'Columna esquerra ({n} articles)',fRight:'Columna dreta ({n} articles)',fExcl:'Articles no inclosos al resultat ({n})',fNeedNec:'puja les necessitats d’aquesta setmana per veure’l repartit en dues columnes',fOld:'Aquesta setmana es va pujar abans de desar totes les files de l’Excel: només es veuen els rams que es van marcar. Torna a pujar l’arxiu per veure’l complet.',week:'Setmana',year:'Any',weekNum:'Núm. setmana',refresh:'Actualitzar',export:'Exportar a Excel',
   noActive:'Encara no hi ha necessitats de producció carregades.',planned:'Previst',made:'Fabricat',pending:'Pendent',progress:'Compliment',
   all:'Tots',onlyPending:'Pendents',left:'Falten',done:'Completat',over:'De més',stP:'Pendent',stC:'En curs',chP:'pendent',chC:'en curs',chD:'completats',annotate:'Anotar',madeOf:'fabricats de',plannedW:'previstos',leftW:'falten',noItems:'No hi ha rams amb aquest filtre',lastNotes:'Últimes anotacions',annul:'Anul·lar',annulled:'anul·lat',
   annulQ:'Vols anul·lar aquesta anotació?',yes:'Sí',no:'No',toAdd:'Quantitat a sumar',saveAdd:'Desar',setTotalLbl:'O escriu el total fet',saveTotal:'Desar total',close:'Tancar',
@@ -453,22 +456,29 @@ const wkLabel = w => { const m = /^(\d{4})-W(\d{2})$/.exec(w||''); return m ? 'W
 
 /* ====== API ====== */
 let busy = 0;
-function loading(on){ busy += on?1:-1; $('loader').classList.toggle('hidden', busy<=0); }
-async function api(action, data = {}, pwd){
-  loading(true);
+function loading(on){
+  busy += on?1:-1; const L = $('loader');
+  if (on && busy===1) { L.classList.remove('hidden','end','on'); void L.offsetWidth; L.classList.add('on'); }
+  if (!on && busy<=0) { busy = 0; L.classList.remove('on'); L.classList.add('end'); }
+}
+async function api(action, data = {}, pwd, quiet){   // quiet: sin barra de carga (actualizaciones automáticas)
+  if (!quiet) loading(true);
   try {
     let lastErr;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 30000);   // como máximo 30 s por intento
       try {
-        const r = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        const r = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, signal: ctl.signal,
           body: JSON.stringify(Object.assign({ action, pwd: pwd ?? S.pwd }, data)) });
-        const j = await r.json();
+        const txt = await r.text(); let j;
+        try { j = JSON.parse(txt); } catch(pe) { const e = new Error(t('srvErr')); e.server = true; e.detail = txt.slice(0, 300); throw e; }
         if (!j.ok) { const e = new Error(j.error||'Error'); e.server = true; throw e; }
         return j;
-      } catch (e) { lastErr = e; if (e.server) throw e; await new Promise(r => setTimeout(r, 600*(i+1))); }
+      } catch (e) { lastErr = e; if (e.server) throw e; await new Promise(r => setTimeout(r, 800*(i+1))); }
+      finally { clearTimeout(to); }
     }
-    throw new Error(t('netErr'));
-  } finally { loading(false); }
+    throw new Error(lastErr && lastErr.name === 'AbortError' ? t('slowErr') : t('netErr'));
+  } finally { if (!quiet) loading(false); }
 }
 function toast(msg, err){ const d=document.createElement('div'); d.className='toast'+(err?' e':''); d.textContent=msg; document.body.appendChild(d); setTimeout(()=>d.remove(), err?6000:1800); }
 function errMsg(e){ if(e.message==='NEG') return t('negErr'); if(e.message==='PWD') return t('badPwd'); return e.message; }
@@ -513,7 +523,7 @@ async function login(pwd, silent){
   if (cache) { S.pwd = pwd; S.role = cache.role; S.active = cache.active; S.weeks = cache.weeks||[]; S.data = cache.data; S.fresh = 0; enterApp(); renderTabs(); showTab(S.tab); }
   try {
     let r;
-    try { r = await api('init', {}, pwd); }
+    try { r = await api('init', {}, pwd, !!cache); }   // con datos guardados en pantalla, se actualiza sin barra
     catch (e) { if (e.server && /desconocida/i.test(e.message)) { r = await api('login', {}, pwd); r.legacy = true; } else throw e; }
     if (my !== loginSeq) return;   // se ha iniciado otro acceso: se ignora este
     S.pwd = pwd; S.role = r.role; S.active = r.active; S.srvVersion = r.version || 0; lsSet('cp_pwd', pwd);
@@ -557,10 +567,13 @@ async function openTab(k){
   clearInterval(S.poll);
   try {
     if (k==='prod') { $('sProd').classList.remove('hidden'); await loadProd(); S.poll = setInterval(() => { if(!S.modal && !S.compOpen && !document.hidden) loadProd(true); }, 30000); }
-    if (k==='res')  { $('sRes').classList.remove('hidden'); await loadWeeks(); fillResWeek(); await loadRes(); }
+    if (k==='res')  { $('sRes').classList.remove('hidden'); $('resTable').innerHTML = `<p class="muted">${t('loadingTxt')}</p>`; await loadWeeks(); fillResWeek(); await loadRes(); }
     if (k==='up')   { $('sUp').classList.remove('hidden'); await loadWeeks(); renderWeeks(); }
     if (k==='files'){ $('sFiles').classList.remove('hidden'); await loadWeeks(); fillWeekSel($('fWeek')); await loadFiles(); }
-  } catch(e){ toast(errMsg(e), true); }
+  } catch(e){
+    toast(errMsg(e), true);
+    if (k==='res') { $('resTable').innerHTML = `<p class="err" style="text-align:left">${esc(errMsg(e))}</p><button class="btn sec" id="bResRetry">${t('retry')}</button>`; $('bResRetry').onclick = () => openTab('res'); }
+  }
 }
 function renderCurrent(){ if(S.tab==='prod') renderProd(); if(S.tab==='res') { fillResWeek(); renderRes(); } if(S.tab==='up'){ renderWeeks(); renderUpTable(); } if(S.tab==='files'){ fillWeekSel($('fWeek')); renderFiles(); } }
 
@@ -570,7 +583,7 @@ async function loadProd(silent){
     if (S.fresh && Date.now() - S.fresh < 5000) { S.fresh = 0; renderProd(); return; }   // recién cargado con «init» (solo se aprovecha una vez)
     if (!silent) { const w = await api('weeks'); S.weeks = w.weeks; S.active = w.active || (w.weeks[0]||{}).week || ''; renderTabs(); }
     if (!S.active) { S.data = null; renderProd(); return; }
-    S.data = await api('getWeek', { week: S.active });
+    S.data = await api('getWeek', { week: S.active }, undefined, silent);
     renderProd(); saveCache();
   } catch(e){ if(!silent) toast(errMsg(e), true); }
 }
@@ -620,13 +633,14 @@ function renderProd(){
       <button class="chip c-c ${S.sem==='c'?'on':''}" data-sem="c"><b>${cnt.c}</b>${t('chC')}</button>
       <button class="chip c-d ${S.sem==='d'?'on':''}" data-sem="d"><b>${cnt.d}</b>${t('chD')}</button>
     </div>`;
-  const groups = [...new Set(d.needs.map(n=>n.grupo))];
+  const sorted = ordenarNec(d.needs);   // mismo orden que «Ordenar producción», aunque la semana se subiera desordenada
+  const groups = [...new Set(sorted.map(n=>n.grupo))];
   $('prodFilters').innerHTML = ['all',...groups].map(g => `<button class="${!S.onlyPend&&S.filter===g?'on':''}" data-f="${esc(g)}">${g==='all'?t('all'):esc(g.charAt(0)+g.slice(1).toLowerCase())}</button>`).join('')
     + `<button class="${S.onlyPend?'on':''}" data-pend="1">${t('onlyPending')}</button>`;
   const ok = n => (S.onlyPend || S.filter==='all' || n.grupo===S.filter) && (!S.onlyPend || estado(n)!=='d') && (!S.sem || estado(n)===S.sem);
   let html = '';
   groups.forEach(g => {
-    const rows = d.needs.filter(n => n.grupo===g && ok(n));
+    const rows = sorted.filter(n => n.grupo===g && ok(n));
     if (!rows.length) return;
     html += `<div class="gh">${esc(g)}</div>` + rows.map(n => {
       const m = made(n.articulo), k = colores(n), p = n.unidades ? Math.min(100, m/n.unidades*100) : 0;
@@ -839,13 +853,21 @@ function fillResWeek(){
   sel.innerHTML = S.weeks.map(w => `<option value="${esc(w.week)}">${esc(wkLabel(w.week))}${w.week===S.active?' ('+t('isActive')+')':''}</option>`).join('');
   sel.value = cur;
 }
-async function loadRes(){ const w = $('resWeek').value; S.resData = w ? await api('getWeek', { week: w }) : null; renderRes(); }
-$('resWeek').onchange = () => loadRes().catch(e=>toast(errMsg(e),true));
-$('bResRefresh').onclick = () => loadRes().catch(e=>toast(errMsg(e),true));
+async function loadRes(){
+  const w = $('resWeek').value;
+  if (!w) { S.resData = null; renderRes(); return; }
+  $('resTable').innerHTML = `<p class="muted">${t('loadingTxt')}</p>`; $('resSum').innerHTML = '';
+  try { S.resData = await api('getWeek', { week: w }); }
+  catch (e) { $('resTable').innerHTML = `<p class="err" style="text-align:left">${esc(errMsg(e))}</p><button class="btn sec" id="bResRetry">${t('retry')}</button>`; $('bResRetry').onclick = () => loadRes(); return; }
+  try { renderRes(); }
+  catch (e) { $('resTable').innerHTML = `<p class="err" style="text-align:left">${esc(t('renderErr'))}: ${esc(e.message)}</p>`; }
+}
+$('resWeek').onchange = () => loadRes();
+$('bResRefresh').onclick = () => loadRes();
 
 function resModel(d){
   const days = [...new Set(Object.values(d.byDay).flatMap(o => Object.keys(o)))].sort();
-  const rows = d.needs.map(n => ({ a:n.articulo, g:n.grupo, p:n.unidades, f:d.totals[n.articulo]||0, by:d.byDay[n.articulo]||{} }));
+  const rows = ordenarNec(d.needs).map(n => ({ a:n.articulo, g:n.grupo, p:n.unidades, f:d.totals[n.articulo]||0, by:d.byDay[n.articulo]||{} }));
   // anotaciones de artículos que ya no están en la previsión (p. ej. tras resubir el archivo)
   Object.keys(d.totals).forEach(a => { if (!d.needs.some(n=>n.articulo===a) && d.totals[a]) rows.push({ a, g:'', p:0, f:d.totals[a], by:d.byDay[a]||{}, off:true }); });
   return { days, rows };
@@ -915,7 +937,7 @@ $('file').onchange = async e => {
       items.push({ articulo:nm, grupo, pc:Number(g(r,'p/c'))||0, unidades:Number(g(r,'unidades'))||0, carros:Number(g(r,'carros'))||0,
         cubos:Number(g(r,'cubos'))||0, paquetes:Number(g(r,'paquetes'))||0, bloque, sel: grupo!=='OTRO' && !/NIDO/.test(up) });
     }
-    S.upItems = items;
+    S.upItems = ordenarNec(items);   // se guarda ya ordenado como en «Ordenar producción»
     const m = /W\s*(\d{1,2})/i.exec(f.name);
     $('upWeek').value = m ? Number(m[1]) : '';
     $('upYear').value = new Date().getFullYear();
@@ -959,9 +981,43 @@ $('weeksTable').onclick = async e => {
 };
 
 /* ====== SUBIR ESCANDALLO ====== */
-S.escItems = null; S.escNeeds = null;
+S.escItems = null; S.escNeeds = null; S.escMeta = {};
+// Lee el informe de escandallos tal como sale de Sage. Sage a veces descoloca los componentes
+// (código en la columna «nombre»), así que se busca el código (solo dígitos) en la fila y su nombre en la celda siguiente.
+function parseSage(rows){
+  let hi = -1;
+  for (let i=0; i<Math.min(rows.length, 15) && hi<0; i++) if (rows[i].some(c => norm(cellStr(c))==='articulo')) hi = i;
+  if (hi < 0) return null;
+  const h = rows[hi].map(c => norm(cellStr(c)));
+  const iArt = h.indexOf('articulo'), iNom = h.indexOf('nombre'), iUnd = h.indexOf('unidades');
+  if (iNom < 0 || iUnd < 0) return null;
+  const meta = {};
+  rows.slice(0, hi).forEach(r => r.forEach((c, j) => {
+    const v = cellStr(c), w = /W\s*(\d{1,2})\b/i.exec(v); if (w && !meta.week) meta.week = Number(w[1]);
+    if (norm(v).startsWith('ejercicio')) { for (let k=j+1; k<r.length; k++) { const y = cellStr(r[k]); if (/^20\d\d$/.test(y)) { meta.year = Number(y); break; } } }
+  }));
+  const arts = []; let cur = null;
+  for (let i=hi+1; i<rows.length; i++){
+    const r = rows[i], art = cellStr(r[iArt]), nom = cellStr(r[iNom]);
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(art) || r.some(c => /^p[aá]gina/i.test(cellStr(c)))) continue;   // pie de página
+    if (art && /^\d+$/.test(art) && nom) { cur = { articulo:nom, lado:'I', comps:[], seen:{} }; arts.push(cur); continue; }
+    if (!cur) continue;
+    for (let j=0; j<r.length; j++){
+      if (j===iUnd) continue;
+      const v = cellStr(r[j]);
+      if (/^\d{6,}$/.test(v)) {
+        let n = ''; for (let k=j+1; k<r.length; k++) { if (k===iUnd) continue; const x = cellStr(r[k]); if (x) { n = x; break; } }
+        const u = Number(String(cellStr(r[iUnd])).replace(',','.')) || 0;
+        if (n && !cur.seen[v]) { cur.seen[v] = 1; cur.comps.push({ codigo:v, componente:n, unidades:u }); }
+        break;
+      }
+    }
+  }
+  arts.forEach(a => delete a.seen);
+  return arts.length ? { arts, meta } : null;
+}
 $('fileEsc').onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
+  const f = e.target.files[0]; if (!f) return; S.escFile = f.name;
   $('escWarn').textContent = '';
   try {
     await needXLSX();
@@ -974,8 +1030,14 @@ $('fileEsc').onchange = async e => {
       r.forEach((h,j) => { if (h==='componente' && norm(rows[i][j-1])==='nombre') groups.push(j); });
       if (groups.length) hi = i;
     }
-    if (hi < 0) { $('escWarn').textContent = t('escNoHeader'); S.escItems=null; $('escCfg').classList.remove('hidden'); renderEscTable(); return; }
     const arts = [], idx = {};
+    if (hi < 0) {
+      // Formato original de Sage (sin pasar por «Ordenar producción»): cabecera «articulo · nombre · componente · nombre · unidades»
+      const sg = parseSage(rows);
+      if (!sg) { $('escWarn').textContent = t('escNoHeader'); S.escItems=null; $('escCfg').classList.remove('hidden'); renderEscTable(); return; }
+      sg.arts.forEach(a => arts.push(a));
+      S.escMeta = sg.meta;
+    } else S.escMeta = {};
     groups.forEach((c, gi) => {
       let cur = null, blanks = 0, inferior = false;
       for (let i=hi+1; i<rows.length; i++){
@@ -989,8 +1051,8 @@ $('fileEsc').onchange = async e => {
     });
     S.escItems = arts.filter(a => a.comps.length);
     const m = /W\s*(\d{1,2})/i.exec(f.name);
-    $('escWeek').value = m ? Number(m[1]) : '';
-    $('escYear').value = new Date().getFullYear();
+    $('escWeek').value = m ? Number(m[1]) : (S.escMeta.week || '');
+    $('escYear').value = S.escMeta.year || new Date().getFullYear();
     $('escCfg').classList.remove('hidden');
     await loadEscNeeds();
   } catch(err){ toast(err.message, true); }
@@ -1023,7 +1085,7 @@ $('bUploadEsc').onclick = async () => {
   if (!S.escItems || !S.escItems.length) { toast(t('noneSel'), true); return; }
   if (!await confirmBox(t('confirmEsc', { w: wkLabel(wk), n: S.escItems.length }))) return;
   try {
-    const r = await api('uploadEsc', { week: wk, items: S.escItems });
+    const r = await api('uploadEsc', { week: wk, items: S.escItems, archivo: S.escFile || '' });
     S.weeks = r.weeks; renderWeeks();
     S.escItems = null; $('fileEsc').value=''; $('escCfg').classList.add('hidden');
     toast(t('saved'));
@@ -1039,8 +1101,58 @@ function fillWeekSel(sel){
 async function loadFiles(){ const w = $('fWeek').value; S.files = w ? await api('files', { week: w }) : null; renderFiles(); }
 $('fWeek').onchange = () => loadFiles().catch(e=>toast(errMsg(e),true));
 $('bFRefresh').onclick = () => loadFiles().then(()=>toast(t('refreshed'))).catch(e=>toast(errMsg(e),true));
+// Mismo reparto que la app «Ordenar producción» (pestaña Escandallos):
+// solo artículos en producción (≥5 ud y sin NIDO); fuera los PAPEL con los mismos componentes y unidades que un RAMO;
+// RAMO BOUQUET a la izquierda, todos los PAPEL a la derecha, el resto de grupos RAMO repartidos equilibrando líneas;
+// lo que no entra va al bloque inferior.
+// Mismo orden que «Ordenar producción» (pestaña Producción): primero RAMO, luego PAPEL, luego el resto,
+// cada grupo de mayor a menor precio con los BUQ juntos; al final los de menos de 5 ud y los NIDO.
+// Cada grupo es un bloque (se separa con una fila en blanco). Con un archivo ya ordenado, el orden no cambia.
+function ordenarNec(list){
+  const up = s => String(s||'').toUpperCase().trim();
+  const precio = n => { const m = String(n).match(/(\d+[.,]\d+)/); return m ? parseFloat(m[1].replace(',', '.')) : 0; };
+  const filas = [], filtrados = [];
+  list.forEach(r => (Number(r.unidades) < 5 || up(r.articulo).includes('NIDO') ? filtrados : filas).push(r));
+  const g1 = filas.filter(r => up(r.articulo).startsWith('RAMO')), g2 = filas.filter(r => up(r.articulo).startsWith('PAPEL'));
+  const resto = filas.filter(r => !up(r.articulo).startsWith('RAMO') && !up(r.articulo).startsWith('PAPEL'));
+  const sortG = arr => {
+    const isBq = r => up(r.articulo).includes('BUQ');
+    const bqs = arr.filter(isBq).sort((a, b) => precio(b.articulo) - precio(a.articulo));
+    const nor = arr.filter(r => !isBq(r)).sort((a, b) => precio(b.articulo) - precio(a.articulo));
+    if (!bqs.length) return nor;
+    const max = precio(bqs[0].articulo), k = nor.findIndex(r => precio(r.articulo) < max);
+    return k < 0 ? [...nor, ...bqs] : [...nor.slice(0, k), ...bqs, ...nor.slice(k)];
+  };
+  const out = []; let b = 0;
+  [sortG(g1), sortG(g2), resto, filtrados].forEach(g => { if (!g.length) return; g.forEach(r => out.push(Object.assign({}, r, { bloque: b }))); b++; });
+  return out;
+}
+function layoutEsc(esc, nec){
+  if (!nec || !nec.length) return esc;
+  const up = s => String(s||'').toUpperCase().trim();
+  const prod = nec.filter(r => r.unidades >= 5 && !up(r.articulo).includes('NIDO'));
+  const prodSet = new Set(prod.map(r => up(r.articulo)));
+  const order = {}; nec.forEach((r, i) => { order[up(r.articulo)] = i; });
+  const enProd = esc.filter(a => prodSet.has(up(a.articulo)));
+  const ramos = enProd.filter(a => up(a.articulo).startsWith('RAMO')), papeles = enProd.filter(a => up(a.articulo).startsWith('PAPEL'));
+  const iguales = (a, b) => { if (a.length !== b.length) return false; const m = {}; a.forEach(c => m[c.codigo] = Number(c.unidades)); return b.every(c => c.codigo in m && m[c.codigo] === Number(c.unidades)); };
+  const papelesU = papeles.filter(p => !ramos.some(r => iguales(r.comps, p.comps)));
+  const tipoKey = n => { const u = up(n), pre = u.startsWith('PAPEL') ? 'PAPEL' : 'RAMO', w = u.replace(/^(RAMO|PAPEL)\s+/, '').split(/\s+/)[0];
+    return pre + '_' + (w === 'ROSAS' ? 'ROSA' : (w === 'BUQ.' || w === 'BUQ') ? 'BOUQUET' : w); };
+  const groups = {}; [...ramos, ...papelesU].forEach(a => (groups[tipoKey(a.articulo)] = groups[tipoKey(a.articulo)] || []).push(a));
+  const gl = Object.entries(groups).map(([k, arts]) => ({ k, arts: arts.slice().sort((x, y) => (order[up(x.articulo)] ?? 999) - (order[up(y.articulo)] ?? 999)), lines: arts.reduce((s, a) => s + 1 + a.comps.length, 0) }))
+    .sort((a, b) => b.lines - a.lines);
+  const L = [], R = []; let lL = 0, rL = 0;
+  gl.forEach(g => { if (g.k === 'RAMO_BOUQUET') { L.push(...g.arts); lL += g.lines; } else if (g.k.startsWith('PAPEL_')) { R.push(...g.arts); rL += g.lines; } });
+  gl.forEach(g => { if (g.k === 'RAMO_BOUQUET' || g.k.startsWith('PAPEL_')) return; if (lL <= rL) { L.push(...g.arts); lL += g.lines; } else { R.push(...g.arts); rL += g.lines; } });
+  const main = new Set([...L, ...R].map(a => up(a.articulo)));
+  return [...L.map(a => Object.assign({}, a, { lado:'I' })), ...R.map(a => Object.assign({}, a, { lado:'D' })),
+          ...esc.filter(a => !main.has(up(a.articulo))).map(a => Object.assign({}, a, { lado:'X' }))];
+}
 function renderFiles(){
   const F = S.files;
+  S.fileView = { week: F && F.week };
+  $('bXNec').disabled = !(F && F.nec.length); $('bXEsc').disabled = !(F && F.esc.length);
   // Necesidades: tabla igual que «Ordenar producción»
   if (!F || !F.nec.length) { $('fNecInfo').textContent = ''; $('fNec').innerHTML = `<p class="muted">${t('fNoNec')}</p>`; }
   else {
@@ -1049,7 +1161,8 @@ function renderFiles(){
     $('fNecInfo').innerHTML = esc(t('fUploaded', { d: sub })) + ' · ' + esc(t('fNecCount', { n: F.nec.length })) + (old ? `<br><span class="warn">${esc(t('fOld'))}</span>` + (S.role==='admin' ? ` <button class="lnk" style="color:var(--tx)" id="goUp">${t('goUp')}</button>` : '') : '');
     const g = $('goUp'); if (g) g.onclick = () => openTab('up');
     let i = 0, last = null, h = '';
-    F.nec.forEach(r => {
+    S.fileView.nec = ordenarNec(F.nec);
+    S.fileView.nec.forEach(r => {
       if (last !== null && r.bloque !== last) { h += `<tr class="sp ${i%2?'od':'ev'}"><td colspan="6">&nbsp;</td></tr>`; i++; }
       last = r.bloque;
       h += `<tr class="${i%2?'od':'ev'}"><td>${r.pc}</td><td>${esc(r.articulo)}</td><td>${Number(r.unidades).toLocaleString('es-ES')}</td><td>${r.carros}</td><td>${r.cubos}</td><td>${r.paquetes}</td></tr>`; i++;
@@ -1060,7 +1173,12 @@ function renderFiles(){
   if (!F || !F.esc.length) { $('fEscInfo').textContent = ''; $('fEsc').innerHTML = `<p class="muted">${t('fNoEsc')}</p>`; return; }
   const sub = F.esc.reduce((m,a)=> a.subido>m ? a.subido : m, '');
   $('fEscInfo').textContent = t('fUploaded', { d: sub }) + ' · ' + t('fEscCount', { n: F.esc.length });
-  const L = F.esc.filter(a => a.lado === 'I'), R = F.esc.filter(a => a.lado === 'D'), X = F.esc.filter(a => a.lado === 'X');
+  // Escandallo subido tal como sale de Sage: se reparte igual que en «Ordenar producción»
+  let E = F.esc;
+  if (!E.some(a => a.lado === 'D' || a.lado === 'X')) E = layoutEsc(E, ordenarNec(F.nec));
+  if (!E.some(a => a.lado === 'D' || a.lado === 'X') && !F.nec.length) $('fEscInfo').textContent += ' · ' + t('fNeedNec');
+  const L = E.filter(a => a.lado === 'I'), R = E.filter(a => a.lado === 'D'), X = E.filter(a => a.lado === 'X');
+  S.fileView.esc = { L, R, X, archivo: (F.esc.find(a => a.archivo) || {}).archivo || '' };
   const tbl = arts => `<table class="esct"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
     <thead><tr><th>Nombre</th><th>Componente</th><th>Nombre comp.</th><th>Ud.</th></tr></thead><tbody>
     ${arts.map(a => `<tr class="ah"><td colspan="4">${esc(a.articulo)}</td></tr>` + a.comps.map(c => `<tr><td></td><td class="cc">${esc(c.codigo)}</td><td>${esc(c.componente)}</td><td class="cu">${fmt(c.unidades)}</td></tr>`).join('')).join('')}
@@ -1070,6 +1188,79 @@ function renderFiles(){
     : tbl(L))
     + (X.length ? `<div class="escx"><div class="esct-title" style="color:#b06000">${t('fExcl', { n: X.length })}</div><div class="escx-t">${tbl(X)}</div></div>` : '');
 }
+
+/* ====== EXPORTAR A EXCEL (idéntico a «Ordenar producción») ====== */
+let _xjsP = null;
+function needExcelJS(){
+  if (window.ExcelJS) return Promise.resolve();
+  if (!_xjsP) _xjsP = new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js';
+    sc.onload = ok; sc.onerror = () => { _xjsP = null; ko(new Error(t('netErr'))); }; document.head.appendChild(sc); });
+  return _xjsP;
+}
+const weekNum = w => { const m = /W(\d+)$/.exec(w || ''); return m ? String(Number(m[1])) : ''; };
+async function saveBook(wb, name){
+  const buf = await wb.xlsx.writeBuffer();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+$('bXNec').onclick = async () => {
+  const V = S.fileView; if (!V || !V.nec || !V.nec.length) return;
+  try { await needExcelJS(); } catch(e) { toast(errMsg(e), true); return; }
+  const workbook = new ExcelJS.Workbook();
+  const ws = workbook.addWorksheet('Calculo de necesidades de exped');
+  ws.columns = [{ width:18.14 },{ width:10.71 },{ width:5.43 },{ width:34.0 },{ width:11.0 },{ width:8.29 },{ width:8.14 },{ width:11.0 },{ width:13.86 }];
+  const hRow = ws.getRow(1);
+  ['P/c','Nombre','Unidades','Carros','Cubos','Paquetes'].forEach((h, i) => {
+    const cell = hRow.getCell(i + 3); cell.value = h;
+    cell.font = { name:'Calibri', size:11, color:{ argb:'FFFFFFFF' } };
+    cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF505050' } };
+    cell.alignment = { horizontal: i === 1 ? 'left' : 'right' };
+  });
+  let excelRow = 2, colorIdx = 0, last = null;
+  V.nec.forEach(r => {
+    if (last !== null && r.bloque !== last) {   // fila separadora entre grupos (también cuenta en la alternancia)
+      const sep = ws.getRow(excelRow), green = colorIdx % 2 === 0;
+      for (let c = 3; c <= 8; c++) { const cell = sep.getCell(c); if (green) cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFE2EFDA' } }; cell.font = { name:'Calibri', size:11 }; }
+      excelRow++; colorIdx++;
+    }
+    last = r.bloque;
+    const green = colorIdx % 2 === 0, row = ws.getRow(excelRow);
+    [r.pc, r.articulo, r.unidades, r.carros, r.cubos, r.paquetes].forEach((v, i) => {
+      const cell = row.getCell(i + 3);
+      cell.value = i === 1 ? v : Number(v);
+      cell.font = { name:'Calibri', size:11, color:{ argb:'FF000000' } };
+      cell.alignment = { horizontal: i === 1 ? 'left' : 'right' };
+      if (green) cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFE2EFDA' } };
+      if (i === 2) cell.numFmt = '#,##0';
+    });
+    excelRow++; colorIdx++;
+  });
+  const w = weekNum(V.week);
+  await saveBook(workbook, w ? `Calculo de necesidades de expedicion W${w}.xlsx` : 'Calculo de necesidades de expedicion.xlsx');
+};
+$('bXEsc').onclick = async () => {
+  const V = S.fileView; if (!V || !V.esc) return;
+  try { await needExcelJS(); } catch(e) { toast(errMsg(e), true); return; }
+  const { L, R, X } = V.esc;
+  const toRows = arts => { const o = []; arts.forEach(a => { o.push({ type:'header', nombre:a.articulo }); a.comps.forEach(c => o.push({ type:'comp', codigo:c.codigo, cnombre:c.componente, unidades:c.unidades })); }); return o; };
+  const lRows = toRows(L), rRows = toRows(R);
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('New Report');
+  ws.columns = [{ width:6.14 },{ width:9.57 },{ width:3.86 },{ width:9.29 },{ width:13.29 },{ width:28.71 },{ width:8.86 },{ width:6.57 },{ width:3 },{ width:9.29 },{ width:13.29 },{ width:28.71 },{ width:8.86 }];
+  const hRow = ws.getRow(1);
+  const hs = (col, txt) => { const c = hRow.getCell(col); c.value = txt; c.font = { name:'Calibri', size:10, bold:true }; };
+  hs(4,'nombre'); hs(5,'componente'); hs(6,'nombre'); hs(7,'unidades'); hs(10,'nombre'); hs(11,'componente'); hs(12,'nombre'); hs(13,'unidades');
+  const put = (row, col, val, bold, code) => { const c = row.getCell(col); c.value = val; c.font = { name:'Calibri', size:11, bold }; if (code) c.alignment = { horizontal:'left' }; };
+  const write = (row, r, base) => { if (r.type === 'header') put(row, base, r.nombre, true, false); else { put(row, base+1, r.codigo, false, true); put(row, base+2, r.cnombre, false, false); put(row, base+3, r.unidades, false, false); } };
+  const maxRows = Math.max(lRows.length, rRows.length);
+  for (let i = 0; i < maxRows; i++) { const row = ws.getRow(i + 2); if (lRows[i]) write(row, lRows[i], 4); if (rRows[i]) write(row, rRows[i], 10); }
+  if (X.length) { let n = maxRows + 2 + 5; toRows(X).forEach(r => { write(ws.getRow(n), r, 4); n++; }); }   // 5 filas en blanco y el bloque inferior en D–G
+  const w = weekNum(V.week);
+  const base = V.esc.archivo || 'ESCANDALLOS DEL TIPO EXPEDICION - Carga semanal.xlsx';
+  const dot = base.lastIndexOf('.'), nm = dot >= 0 ? base.slice(0, dot) : base, ext = dot >= 0 ? base.slice(dot) : '.xlsx';
+  await saveBook(wb, w && !new RegExp('(^|[\\s_-])W' + w + '$', 'i').test(nm) ? `${nm} W${w}${ext}` : `${nm}${ext}`);
+};
 
 /* ====== INICIO ====== */
 renderLang();
