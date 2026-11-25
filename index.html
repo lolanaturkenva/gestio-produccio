@@ -26,6 +26,14 @@ main{max-width:1150px;margin:0 auto;padding:1rem}
 .tabs:empty{display:none}
 .tabs button{border:0;background:none;padding:.7rem 0;color:var(--mu);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tabs button.on{color:var(--tx);border-bottom-color:var(--tx);font-weight:700}
+.tabsw{position:relative}
+@media(max-width:700px){
+  .tabs{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.tabs::-webkit-scrollbar{display:none}
+  .tabs button{white-space:nowrap;flex:none}
+  .tabs::after{content:'';flex:none;width:1.4rem}
+  .tabsw::after{content:'';position:absolute;top:0;right:0;bottom:1px;width:2.4rem;pointer-events:none;background:linear-gradient(90deg,rgba(244,245,247,0),var(--bg) 85%);transition:opacity .2s}
+  .tabsw.end::after{opacity:0}
+}
 .panel{background:#fff;border:1px solid var(--ln);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
 .btn{background:var(--tx);color:#fff;border:1.5px solid var(--tx);border-radius:8px;padding:.6rem 1.1rem;font-weight:700}
 .btn.sec{background:#fff;color:var(--tx)}
@@ -235,6 +243,20 @@ details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
 .load.on{width:85%;opacity:1}
 .load.end{width:100%;opacity:0;transition:width .25s,opacity .5s .2s}
 .offrow td{color:#999}
+.rcards{display:none}
+@media(max-width:700px){
+  #resTable{padding:0;overflow:visible}#resTable>table{display:none}.rcards{display:block}
+  .rc{padding:.75rem .9rem;border-bottom:1px solid var(--ln);cursor:pointer}
+  .rc .h{display:flex;align-items:center;gap:.6rem}.rc .h .nm{font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rc .h .p{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:800;font-size:1.05rem;color:var(--c)}
+  .rc .l{display:flex;justify-content:space-between;gap:.4rem;font-size:.8rem;color:#5b6470;margin:.35rem 0 .45rem;white-space:nowrap}.rc .l span{min-width:0}.rc .l b{color:var(--tx);font-family:'JetBrains Mono',ui-monospace,monospace}
+  .rc .l .neg b{color:var(--red)}.rc .l .pos b{color:var(--or)}
+  .rc .bar i{background:var(--c)}
+  .rc .dd{display:none;margin-top:.55rem;font-size:.82rem}.rc.open .dd{display:block}
+  .rc .dd div{display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px dashed var(--ln)}.rc .dd div b{font-family:'JetBrains Mono',ui-monospace,monospace}
+  .rc .ch{color:var(--mu);font-size:.8rem;transition:transform .2s}.rc.open .ch{transform:rotate(90deg)}
+  .rc.tot{background:var(--soft);cursor:default}.rc.tot .nm{text-transform:uppercase}
+}
 .tag{font-size:.7rem;padding:.05rem .4rem;border-radius:4px;background:var(--ln);color:#555;margin-left:.3rem}
 </style>
 </head>
@@ -262,7 +284,7 @@ details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
     <button class="hbtn" id="bOut" data-t="logout"></button>
   </header>
   <main>
-    <div class="tabs" id="tabs"></div>
+    <div class="tabsw" id="tabsw"><div class="tabs" id="tabs"></div></div>
 
     <!-- PRODUCCIÓN -->
     <section id="sProd" class="hidden">
@@ -418,7 +440,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbwhRSY2qFgrgKQxpo-Q5zPS
 
 /* ====== TEXTOS ====== */
 const T = {
- es:{appTitle:'Control de Producción',sumTitle:'Resumen por artículo',sumIn:'En las necesidades de la semana ({n})',sumOut:'No están en las necesidades de la semana ({n})',sumAll:'Artículos del escandallo ({n})',preview:'Vista previa (aún no está guardado)',exportX:'Exportar Excel',loadingTxt:'Cargando…',retry:'Reintentar',srvErr:'El Apps Script ha devuelto un error. Revisa que esté publicado en su última versión.',slowErr:'El Sheets está tardando demasiado en responder. Inténtalo de nuevo.',renderErr:'Error al mostrar los resultados',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',markDone:'Marcar como completado',markDoneQ:'¿Marcar {a} como completado? Se anotarán {c}.',m_completo:'completado',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
+ es:{appTitle:'Control de Producción',noDays:'Sin producción anotada',sumTitle:'Resumen por artículo',sumIn:'En las necesidades de la semana ({n})',sumOut:'No están en las necesidades de la semana ({n})',sumAll:'Artículos del escandallo ({n})',preview:'Vista previa (aún no está guardado)',exportX:'Exportar Excel',loadingTxt:'Cargando…',retry:'Reintentar',srvErr:'El Apps Script ha devuelto un error. Revisa que esté publicado en su última versión.',slowErr:'El Sheets está tardando demasiado en responder. Inténtalo de nuevo.',renderErr:'Error al mostrar los resultados',offline:'Sin conexión: se muestran los últimos datos guardados.',vRamos:'Ramos',vTallos:'Tallos',markDone:'Marcar como completado',markDoneQ:'¿Marcar {a} como completado? Se anotarán {c}.',m_completo:'completado',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial de anotaciones',m_resta:'resta',tRamosPU:'Ramos hechos / previstos',tUsedOf:'tallos utilizados de',tPlannedW:'previstos',tLeftW:'faltan',tTypes:'tipos de tallo',tNoEsc:'No hay escandallo cargado para esta semana: no se pueden calcular los tallos.',tSinEsc:'Artículos sin escandallo (no se cuentan sus tallos):',tPrev:'Previstos',tUsed:'Utilizados',tLeft:'Faltan',tArt1:'artículo',tArts:'artículos',tNone:'No hay tallos que mostrar.',notSaved:'No se ha guardado. Revisa que el Apps Script esté publicado en su última versión.',oldSrv:'El Apps Script publicado no es la última versión: publica una nueva versión del Code.gs.',carros:'Carros',cubos:'Cubos',carro1:'carro',carrosL:'carros',cubo1:'cubo',cubosL:'cubos',ramosL:'ramos',ramo1:'ramo',noPc:'Este artículo no tiene P/c en las necesidades: no se puede calcular.',plannedS:'Previsto',madeS:'Hecho:',madeL:'Hecho',m_carros:'carros/cubos',enter:'Entrar',connecting:'Conectando…',pwdPh:'Contraseña',logout:'Salir',badPwd:'Contraseña incorrecta',netErr:'Error de conexión. Inténtalo de nuevo.',
   tProd:'Producción',tRes:'Resultados',tUp:'Necesidades',tFiles:'Archivos',refreshed:'Datos actualizados desde el Sheets',goUp:'Ir a Necesidades para subirlo',fNecTitle:'Necesidades de producción',fEscTitle:'Escandallo',fNoNec:'No hay necesidades cargadas para esta semana.',fNoEsc:'No hay escandallo cargado para esta semana.',fUploaded:'Subido el {d}',fNecCount:'{n} filas',fEscCount:'{n} artículos',fLeft:'Columna izquierda ({n} artículos)',fRight:'Columna derecha ({n} artículos)',fExcl:'Artículos no incluidos en el resultado ({n})',fNeedNec:'sube las necesidades de esta semana para verlo repartido en dos columnas',fOld:'Esta semana se subió antes de guardar todas las filas del Excel: solo se ven los ramos que se marcaron. Vuelve a subir el archivo para verlo completo.',week:'Semana',year:'Año',weekNum:'Nº semana',refresh:'Actualizar',export:'Exportar a Excel',
   noActive:'Todavía no hay necesidades de producción cargadas.',planned:'Previsto',made:'Fabricado',pending:'Pendiente',progress:'Cumplimiento',
   all:'Todos',onlyPending:'Pendientes',left:'Faltan',done:'Completado',over:'De más',stP:'Pendiente',stC:'En curso',chP:'pendiente',chC:'en curso',chD:'completados',annotate:'Anotar',madeOf:'fabricados de',plannedW:'previstos',leftW:'faltan',noItems:'No hay ramos con este filtro',lastNotes:'Últimas anotaciones',annul:'Anular',annulled:'anulado',
@@ -431,7 +453,7 @@ const T = {
   weeksTitle:'Semanas cargadas',escTitle:'Subir escandallo',escHelp:'Selecciona el Excel de escandallos de la semana. Al tocar un artículo en Producción se verá su composición. Si la semana ya tiene escandallo, se sustituye.',escNoHeader:'No encuentro las columnas «nombre», «componente», «nombre», «unidades» en el Excel.',escCount:'{a} artículos con composición',escExists:'La semana {w} ya tiene escandallo: se sustituirá.',escNoNeeds:'La semana {w} todavía no tiene necesidades cargadas.',escMissing:'Artículos de las necesidades sin escandallo:',comps:'Componentes',stemsBunch:'Tallos/ramo',inPlan:'En necesidades',notInWeek:'no está en la semana',confirmEsc:'¿Guardar el escandallo de la semana {w} con {n} artículos?',escCol:'Escandallo',noComp:'No hay escandallo cargado para este artículo en esta semana.',component:'Componente',stem:'Tallo',perBunch:'Ud./ramo',stemsPlanned:'Tallos previstos',stemsLeft:'Tallos que faltan',uploaded:'Subido',items:'Artículos',units:'Unidades',active:'Activa',setActive:'Activar',isActive:'activa',
   article:'Artículo',group:'Grupo',diff:'Diferencia',total:'TOTAL',notInPlan:'fuera de previsión',sel:'Ver',noData:'Sin datos',
   days:['dom','lun','mar','mié','jue','vie','sáb'],confirmUp:'¿Guardar la semana {w} con {n} artículos?'},
- ca:{appTitle:'Control de Producció',sumTitle:'Resum per article',sumIn:'A les necessitats de la setmana ({n})',sumOut:'No són a les necessitats de la setmana ({n})',sumAll:'Articles de l’escandall ({n})',preview:'Vista prèvia (encara no està desat)',exportX:'Exportar Excel',loadingTxt:'Carregant…',retry:'Tornar-ho a provar',srvErr:'L’Apps Script ha retornat un error. Revisa que estigui publicat en la darrera versió.',slowErr:'El Sheets triga massa a respondre. Torna-ho a provar.',renderErr:'Error en mostrar els resultats',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',markDone:'Marcar com a completat',markDoneQ:'Vols marcar {a} com a completat? S’anotaran {c}.',m_completo:'completat',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
+ ca:{appTitle:'Control de Producció',noDays:'Sense producció anotada',sumTitle:'Resum per article',sumIn:'A les necessitats de la setmana ({n})',sumOut:'No són a les necessitats de la setmana ({n})',sumAll:'Articles de l’escandall ({n})',preview:'Vista prèvia (encara no està desat)',exportX:'Exportar Excel',loadingTxt:'Carregant…',retry:'Tornar-ho a provar',srvErr:'L’Apps Script ha retornat un error. Revisa que estigui publicat en la darrera versió.',slowErr:'El Sheets triga massa a respondre. Torna-ho a provar.',renderErr:'Error en mostrar els resultats',offline:'Sense connexió: es mostren les darreres dades desades.',vRamos:'Rams',vTallos:'Tiges',markDone:'Marcar com a completat',markDoneQ:'Vols marcar {a} com a completat? S’anotaran {c}.',m_completo:'completat',tPerBunch:'T/R',sumar:'Sumar',restar:'Restar',history:'Historial d’anotacions',m_resta:'resta',tRamosPU:'Rams fets / previstos',tUsedOf:'tiges utilitzades de',tPlannedW:'previstes',tLeftW:'falten',tTypes:'tipus de tija',tNoEsc:'No hi ha escandall carregat per a aquesta setmana: no es poden calcular les tiges.',tSinEsc:'Articles sense escandall (no se’n compten les tiges):',tPrev:'Previstes',tUsed:'Utilitzades',tLeft:'Falten',tArt1:'article',tArts:'articles',tNone:'No hi ha tiges per mostrar.',notSaved:'No s’ha desat. Revisa que l’Apps Script estigui publicat en la darrera versió.',oldSrv:'L’Apps Script publicat no és la darrera versió: publica una nova versió del Code.gs.',carros:'Carros',cubos:'Cubs',carro1:'carro',carrosL:'carros',cubo1:'cub',cubosL:'cubs',ramosL:'rams',ramo1:'ram',noPc:'Aquest article no té P/c a les necessitats: no es pot calcular.',plannedS:'Previst',madeS:'Fet:',madeL:'Fet',m_carros:'carros/cubs',enter:'Entrar',connecting:'Connectant…',pwdPh:'Contrasenya',logout:'Sortir',badPwd:'Contrasenya incorrecta',netErr:'Error de connexió. Torna-ho a provar.',
   tProd:'Producció',tRes:'Resultats',tUp:'Necessitats',tFiles:'Arxius',refreshed:'Dades actualitzades des del Sheets',goUp:'Anar a Necessitats per pujar-lo',fNecTitle:'Necessitats de producció',fEscTitle:'Escandall',fNoNec:'No hi ha necessitats carregades per a aquesta setmana.',fNoEsc:'No hi ha escandall carregat per a aquesta setmana.',fUploaded:'Pujat el {d}',fNecCount:'{n} files',fEscCount:'{n} articles',fLeft:'Columna esquerra ({n} articles)',fRight:'Columna dreta ({n} articles)',fExcl:'Articles no inclosos al resultat ({n})',fNeedNec:'puja les necessitats d’aquesta setmana per veure’l repartit en dues columnes',fOld:'Aquesta setmana es va pujar abans de desar totes les files de l’Excel: només es veuen els rams que es van marcar. Torna a pujar l’arxiu per veure’l complet.',week:'Setmana',year:'Any',weekNum:'Núm. setmana',refresh:'Actualitzar',export:'Exportar a Excel',
   noActive:'Encara no hi ha necessitats de producció carregades.',planned:'Previst',made:'Fabricat',pending:'Pendent',progress:'Compliment',
   all:'Tots',onlyPending:'Pendents',left:'Falten',done:'Completat',over:'De més',stP:'Pendent',stC:'En curs',chP:'pendent',chC:'en curs',chD:'completats',annotate:'Anotar',madeOf:'fabricats de',plannedW:'previstos',leftW:'falten',noItems:'No hi ha rams amb aquest filtre',lastNotes:'Últimes anotacions',annul:'Anul·lar',annulled:'anul·lat',
@@ -568,7 +590,11 @@ function renderTabs(){
   $('tabs').innerHTML = tb.length>1 ? tb.map(k => `<button data-tab="${k}" class="${S.tab===k?'on':''}">${t({prod:'tProd',res:'tRes',up:'tUp',files:'tFiles'}[k])}</button>`).join('') : '';
   $('hWeek').textContent = S.active ? wkLabel(S.active) : '';
   $('hWeek').classList.toggle('hidden', !S.active);
+  $('tabsw').classList.toggle('hidden', tb.length<=1);
+  requestAnimationFrame(() => { const on = $('tabs').querySelector('.on'); if (on && on.scrollIntoView && innerWidth<=700) on.scrollIntoView({ inline:'nearest', block:'nearest' }); tabShadow(); });
 }
+function tabShadow(){ const x = $('tabs'); $('tabsw').classList.toggle('end', x.scrollLeft + x.clientWidth >= x.scrollWidth - 4); }
+$('tabs').addEventListener('scroll', tabShadow); window.addEventListener('resize', tabShadow);
 $('tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) openTab(b.dataset.tab); };
 function showTab(k){   // muestra una pestaña con los datos que ya hay, sin pedir nada al servidor
   if (!tabsFor().includes(k)) k = tabsFor()[0];
@@ -893,6 +919,7 @@ function resModel(d){
 }
 function dayLbl(s){ const [y,m,dd] = s.split('-').map(Number); const dt = new Date(y,m-1,dd); return t('days')[dt.getDay()]+' '+String(dd).padStart(2,'0')+'/'+String(m).padStart(2,'0'); }
 function pctOf(f,p){ return p ? Math.round(f/p*100) : 0; }
+$('resTable').addEventListener('click', e => { const c = e.target.closest('.rc:not(.tot)'); if (c) c.classList.toggle('open'); });
 function renderRes(){
   const d = S.resData;
   if (!d || !d.needs.length) { $('resSum').innerHTML=''; $('resTable').innerHTML = `<p class="muted">${t('noData')}</p>`; return; }
@@ -910,6 +937,14 @@ function renderRes(){
       <td class="${df<0?'neg':df>0?'pos':''}">${df>0?'+':''}${fmt(df)}</td><td><span class="pct">${r.p?pctOf(r.f,r.p)+'%':''}</span></td></tr>`; }).join('')}
     <tr class="tot"><td>${t('total')}</td>${dayTot.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${fmt(F)}</td><td>${fmt(P)}</td><td>${F-P>0?'+':''}${fmt(F-P)}</td><td>${pctOf(F,P)}%</td></tr>
     </tbody></table>`;
+  // móvil: una tarjeta por artículo; al tocarla se ve el detalle por días
+  const card = (r, tot) => { const df = r.f - r.p, pc = r.p ? pctOf(r.f, r.p) : 0, k = colPct(r.f, r.p);
+    const dd = days.filter(x => r.by[x]).map(x => `<div><span>${dayLbl(x)}</span><b>${fmt(r.by[x])}</b></div>`).join('') || `<div class="muted">${t('noDays')}</div>`;
+    return `<div class="rc ${tot?'tot':'open'}" style="--c:${k.c}">
+      <div class="h">${tot?'':'<span class="ch">▸</span>'}<span class="nm">${esc(r.a)}</span><span class="p">${r.p?pc+'%':''}</span></div>
+      <div class="l"><span>${t('planned')} <b>${fmt(r.p)}</b></span><span>${t('made')} <b>${fmt(r.f)}</b></span><span class="${df<0?'neg':df>0?'pos':''}">${t('diff')} <b>${df>0?'+':''}${fmt(df)}</b></span></div>
+      <div class="bar"><i style="width:${Math.min(100,pc)}%"></i></div>${tot?'':`<div class="dd">${dd}</div>`}</div>`; };
+  $('resTable').insertAdjacentHTML('beforeend', `<div class="rcards">${rows.map(r => card(r)).join('')}${card({ a:t('total'), p:P, f:F, by:{} }, true)}</div>`);
 }
 $('bExport').onclick = async () => {
   const d = S.resData; if (!d || !d.needs.length) return;
